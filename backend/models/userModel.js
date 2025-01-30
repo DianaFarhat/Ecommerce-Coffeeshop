@@ -1,98 +1,94 @@
 const mongoose= require("mongoose");
 const Schema= mongoose.Schema;
+const bcrypt = require('bcrypt');
 
-
-const userSchema= new mongoose.Schema({
-    firstName:{
+const userSchema = new mongoose.Schema(
+    {
+      firstName: {
         type: String,
         required: [true, "Please enter your first name"],
         minLength: 3,
-        trim: 2,
-    },
-    lastName:{
+        trim: true,
+      },
+      lastName: {
         type: String,
         required: [true, "Please enter your last name"],
         minLength: 3,
-        trim: 2,
-    }, 
-    email:{
+        trim: true,
+      },
+      email: {
         type: String,
         unique: true,
         trim: true,
         lowercase: true,
         required: [true, "Please enter your email"],
-    },
-    username:{
+      },
+      username: {
         type: String,
         unique: true,
         trim: true,
         required: [true, "Please enter your username"],
-    },
-    password: {
+      },
+      password: {
         type: String,
         minLength: 8,
         trim: true,
         required: [true, "Please enter your password"],
-    },
-    passwordConfirm: {
+        select: false, // ✅ Hide password from query results for security
+      },
+      passwordConfirm: {
         type: String,
-        minLength: 8,
-        trim: true,
-        required: [true, "Please confirm your password"],
-    },
-    
-    passwordChangedAt: Date,
-
-    role: {
+        required: true,
+        validate: {
+          validator: function (value) {
+            return value === this.password;
+          },
+          message: "Passwords do not match!",
+        },
+      },
+      passwordChangedAt: Date,
+      role: {
         type: String,
         default: "user",
         enum: ["admin", "user"],
-    },
-    
-    orders: [
+      },
+      orders: [
         {
-            type: Schema.Types.ObjectId,
-            ref: "Order",
-        }
-    ],
-},
-{timestamps: true}
-)
-
-userSchema-pre("save", async function (next){
-
-try{
-
-  if(!this.isModified ("password"))
-  return next() 
-
-
-  this.password = await bcrypt. hash(this-password, 12)
-  this.passwordConfirm=undefined;
-
-
-}catch(err){
-    console.log(err)
-}
-
-})
-
-userSchema.methods.checkPassword = async function (candidatePassword, userPassword, ){
-     return await bcrypt.compare(candidatePassword,userPassword);
-
-} 
-
-userSchema.methods.passwordChangedAfterTokenIssued= function (JWTTimestamp){
-    if (this.passwordChangedAt){
-        const passwordChangeTime = parseInt(
-            this.passwordChangedAt.getTime() / 1000,
-            10
-            ) ; 
-            return passwordChangeTime > JWTTimestamp;
+          type: Schema.Types.ObjectId,
+          ref: "Order",
+        },
+      ],
+    },
+    { timestamps: true }
+  );
+  
+  // ✅ Hash Password Before Saving & Remove `passwordConfirm`
+  userSchema.pre("save", async function (next) {
+    try {
+      if (!this.isModified("password")) return next();
+  
+      // Hash the password
+      this.password = await bcrypt.hash(this.password, 12);
+  
+      // Remove the passwordConfirm field from the document
+      delete this.passwordConfirm;
+  
+      next();
+    } catch (err) {
+      next(err);
     }
-
+  });
+  userSchema.methods.checkPassword = async function (candidatePassword, userPassword) {
+    return await bcrypt.compare(candidatePassword, userPassword);
+  };
+  
+  userSchema.methods.passwordChangedAfterTokenIssued = function (JWTTimestamp) {
+    if (this.passwordChangedAt) {
+      const passwordChangeTime = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+      return passwordChangeTime > JWTTimestamp;
+    }
     return false;
-
-}
-
-module.exports= mongoose.model("User", userSchema);
+  };
+  
+  module.exports = mongoose.model("User", userSchema);
+  
