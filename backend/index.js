@@ -4,13 +4,24 @@ const app= express();
 const DB= require('./database').connectToDatabase;
 const userRouter=require("./routes/userRouter")
 const cors = require('cors');
+const cookieParser = require("cookie-parser");
 
 // Run the database connection
 connectToDatabase();
 
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser()); // ✅ Middleware to handle cookies
+
+
+
+
+app.use(cors({
+    origin: "http://localhost:3001", // Allow your frontend domain
+    credentials: true, // Allow credentials like cookies
+}));
+
 app.options('*', cors());
+
 
 app.use("/api/users", userRouter)
 

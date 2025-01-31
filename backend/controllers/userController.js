@@ -23,8 +23,10 @@
 
     const createSendToken=(user,statusCode,res)=>{
         const token =signToken(user._id,res);    
-        console.log("Generated Token:", token); // Log the token to check if it's created
-        res.status(statusCode).json({status:"Success",
+
+    // ✅ Log the cookie to verify if it's being set
+    console.log("Cookies Set:", res.getHeaders()["set-cookie"]);
+            res.status(statusCode).json({status:"Success",
             token,
             data:{
                 user, 
@@ -67,6 +69,7 @@
         await newUser.save();
     
         // Send response with token
+        //signing up and logging in the user
         createSendToken(newUser, 201, res);
         } catch (err) {
         // Handle validation errors
@@ -81,17 +84,23 @@
     exports.login= async(req,res)=>{
         try{
             const {email,password}= req.body;
-            const user = await User.findOne({ email });
-            if (user){
+            const user = await User.findOne({ email }).select("+password");
+            //user not signedup
+            if (!user){
                 return res.status (404).json({ message: "User not found" })
             }
+
+            //if password is not correct
 
             if (!(await user.checkPassword(password,user.password))){
                 return res.status(401).json({message:"Incorrect Email or Password"})
 
             }
 
+            //if login is successfull , set user's token
+
             createSendToken(user, 200, res)
+            console.log("lOGGED IN")
 
 
         }catch(err)
@@ -100,15 +109,30 @@
         }
     }
 
+
+    exports.logout = async (req, res) => {
+        res.cookie("jwt", "", {
+            httpOnly: true, // Corrected the typo here
+            expires: new Date(0),
+        });
+    
+        res.status(200).json({ message: "Logged out successfully" });
+    };
+    
+
     exports.protect=async(req,res,next)=>{
         try{
             //check if token exists
             let token;
-            if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
-
-                token = req.headers.authorization.split(" ")[1];
-
+            if (
+              req.headers.authorization &&
+              req.headers.authorization.startsWith("Bearer")
+            ) {
+              token = req.headers.authorization.split(" ")[1];
+            } else if (req.cookies.jwt) {
+              token = req.cookies.jwt; // ✅ Read from cookies
             }
+            
 
             if (!token){
                 return res.status(401).json({message:"Not logged in"})
