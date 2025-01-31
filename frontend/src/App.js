@@ -1,8 +1,7 @@
-import logo from './logo.svg';
+
 import './App.css';
-import Signup from './components/signup'
-import Login from './components/login'
-// import Navigation from './pages/Auth/Navigation.jsx'
+import { Outlet } from "react-router-dom";
+import Navigation from './pages/Auth/Navigation.jsx'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,9 +9,12 @@ import "react-toastify/dist/ReactToastify.css";
 function App() {
   return (
     <>
-   
-   <Signup></Signup>
-   <Login/></>
+   <ToastContainer/>
+   <Navigation/>
+   <main className='py-3'>
+    <Outlet/>
+   </main>
+   </>
   );
 }
 
