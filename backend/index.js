@@ -9,11 +9,12 @@ const categoryRouter=require("./routes/categoryRouter")
 // Run the database connection
 connectToDatabase();
 
+//Add necessary middleware
 app.use(express.json());
 app.use(cookieParser()); // ✅ Middleware to handle cookies
 
-
-
+// TODO: Check the below 
+/*app.use(express.urlencoded({extended:true})) Was used in project setup */
 
 app.use(cors({
     origin: "http://localhost:3001", // Allow your frontend domain
