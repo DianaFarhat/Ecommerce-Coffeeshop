@@ -3,7 +3,7 @@ const User= require("../models/userModel");
 const Product= require("../models/productModel");
 
 
-// TODO: Make sure productController has protect method that adds user to all requests, to be able to use req.user
+
 exports.addToCart= async (req, res) => {
     try{
         //1. Check if the cart owner still exists
