@@ -82,6 +82,7 @@
         }
     };
     exports.login= async(req,res)=>{
+        console.log("Login route hit");  // Log to see if the route is hit
         try{
             const {email,password}= req.body;
             const user = await User.findOne({ email }).select("+password");
@@ -116,6 +117,7 @@
             expires: new Date(0),
         });
     
+        console.log("Logged out")
         res.status(200).json({ message: "Logged out successfully" });
     };
     

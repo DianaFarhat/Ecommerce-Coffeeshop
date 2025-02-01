@@ -71,7 +71,7 @@ const userSchema = new mongoose.Schema(
       this.password = await bcrypt.hash(this.password, 12);
   
       // Remove the passwordConfirm field from the document
-      delete this.passwordConfirm;
+      this.passwordConfirm=undefined;
   
       next();
     } catch (err) {
