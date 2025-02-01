@@ -14,7 +14,7 @@ function App() {
   return (
     <>
   <Provider store={store}>  
-   <ToastContainer/>
+  <ToastContainer />
    <Navigation/>
    <main className='py-3'>
     <Outlet/>
