@@ -3,6 +3,10 @@ import axios from "axios";
 import { setCredentials } from "../../redux/features/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -27,6 +31,13 @@ const Login = () => {
         }
     }, []);
 
+    
+    useEffect(() => {
+        if (isLoggedIn) {
+          toast.success("User logged in successfully");
+        }
+      }, [isLoggedIn]);
+      
     useEffect(() => {
         if (userInfo) {
           navigate(redirect);
@@ -46,6 +57,8 @@ const Login = () => {
                 { withCredentials: true }
             );
 
+            setIsLoggedIn(true);
+
           
         const { token, user } = response.data;
 
@@ -57,16 +70,18 @@ const Login = () => {
         dispatch(setCredentials(response.data)); // Dispatch full response data
         console.log(response.data); // This will show the exact structure of the response from the server
 
-            setIsLoggedIn(true);
-            
+        setIsLoggedIn(true);
+                     toast.success("User successfully Logged in!"); 
 
-            alert("Login successful!");
-            window.location.href = "/shop";
-        } catch (err) {
-            setError(err.response?.data?.message || "Something went wrong");
-        } finally {
-            setLoading(false);
-        }
+ // Add a delay (e.g., 2 seconds) before redirecting
+        setTimeout(() => {
+   navigate("/shop");
+      }, 2000); // 2000 ms = 2 seconds
+        }catch (err) {
+            const errorMessage = err.response?.data?.message || "Error occurred during login";
+            toast.error(errorMessage);
+          }
+          
     };
 
   
@@ -105,9 +120,18 @@ const Login = () => {
                     >
                         {loading ? "Logging in..." : "Login"}
                     </button>
+
+                     <div className="mt-6 text-center">
+                              <p className="text-sm text-gray-600">
+                                Don't have an account?{' '}
+                                <Link to="/register" className="text-indigo-600 hover:underline">
+                                 Sign Up
+                                </Link>
+                              </p>
+                            </div>
                 </form>
            
-        
+                <ToastContainer />
         </div>
     );
 };
