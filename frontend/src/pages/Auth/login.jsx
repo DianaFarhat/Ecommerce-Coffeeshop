@@ -34,7 +34,7 @@ const Login = () => {
     
     useEffect(() => {
         if (isLoggedIn) {
-          toast.success("User logged in successfully");
+          toast.success("User logged in");
         }
       }, [isLoggedIn]);
       
