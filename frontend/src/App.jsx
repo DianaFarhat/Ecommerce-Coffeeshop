@@ -5,6 +5,9 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Provider } from "react-redux";
 import { store } from "./redux/store"; 
+import { Route, RouterProvider, createRoutesFromElements, createBrowserRouter } from "react-router-dom"; 
+import ReactDOM from "react-dom/client";
+import Login from "./pages/Auth/Login.jsx"
 
 
 function App() {
@@ -20,5 +23,6 @@ function App() {
    </>
   );
 }
+
 
 export default App;

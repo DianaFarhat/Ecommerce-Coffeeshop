@@ -13,6 +13,7 @@ import "./Navigation.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/userApiSlice";
 import { logout } from "../../redux/features/auth/authSlice";
+// import FavoritesCount from "../Products/FavoritesCount";
 
 const Navigation = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -82,7 +83,7 @@ const Navigation = () => {
           </div>
         </Link>
 
-
+     
       </div>
 
       <div className="relative">

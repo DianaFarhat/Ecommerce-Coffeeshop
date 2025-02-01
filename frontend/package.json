@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "main": "src/index.js",
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",
     "axios": "^1.7.9",
@@ -40,5 +41,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.11"
   }
 }
