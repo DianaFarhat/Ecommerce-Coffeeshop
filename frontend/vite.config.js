@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api/": "http://localhost:3001" // Ensure it matches the correct route prefix
+      "/api/": "http://localhost:3000" // Ensure it matches the correct route prefix
     }
   }
   

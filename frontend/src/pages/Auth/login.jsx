@@ -1,116 +1,115 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import Loader from "../../components/Loader";
-import { useLoginMutation } from "../../redux/api/userApiSlice";
+import axios from "axios";
 import { setCredentials } from "../../redux/features/auth/authSlice";
-import { toast } from "react-toastify";
-
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-  const [login, { isLoading }] = useLoginMutation();
-
+    
   const { userInfo } = useSelector((state) => state.auth);
 
   const { search } = useLocation();
   const sp = new URLSearchParams(search);
-  const redirect = sp.get("redirect") || "/";
+  const redirect = sp.get("redirect") || "/login";
 
-  useEffect(() => {
-    if (userInfo) {
-      navigate(redirect);
-    }
-  }, [navigate, redirect, userInfo]);
+    // Check login status when the component mounts
+    useEffect(() => {
+        if (localStorage.getItem("token")) {
+            setIsLoggedIn(true);
+        }
+    }, []);
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await login({ email, password }).unwrap();
-      console.log(res);
-      dispatch(setCredentials({ ...res }));
-      navigate(redirect);
-    } catch (err) {
-      toast.error(err?.data?.message || err.error);
-    }
-  };
+    useEffect(() => {
+        if (userInfo) {
+          navigate(redirect);
+        }
+      }, [navigate, redirect, userInfo]);
+    
+    // Login handler
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
 
-  return (
-    <div>
-      <section className="pl-[10rem] flex flex-wrap">
-        <div className="mr-[4rem] mt-[5rem]">
-          <h1 className="text-2xl font-semibold mb-4">Sign In</h1>
+        try {
+            const response = await axios.post(
+                "http://localhost:3000/api/users/auth/login",
+                { email, password },
+                { withCredentials: true }
+            );
 
-          <form onSubmit={submitHandler} className="container w-[40rem]">
-            <div className="my-[2rem]">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-white"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="mt-1 p-2 border rounded w-full"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+          
+        const { token, user } = response.data;
 
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-white"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                className="mt-1 p-2 border rounded w-full"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+        // Store token and user info in localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("userInfo", JSON.stringify(user)); // Store user info as JSON
 
-            <button
-              disabled={isLoading}
-              type="submit"
-              className="bg-pink-500 text-white px-4 py-2 rounded cursor-pointer my-[1rem]"
-            >
-              {isLoading ? "Signing In..." : "Sign In"}
-            </button>
+        // Dispatch the user info to the Redux store
+        dispatch(setCredentials(response.data)); // Dispatch full response data
+        console.log(response.data); // This will show the exact structure of the response from the server
 
-            {isLoading && <Loader />}
-          </form>
+            setIsLoggedIn(true);
+            
 
-          <div className="mt-4">
-            <p className="text-white">
-              New Customer?{" "}
-              <Link
-                to={redirect ? `/register?redirect=${redirect}` : "/register"}
-                className="text-pink-500 hover:underline"
-              >
-                Register
-              </Link>
-            </p>
-          </div>
+            alert("Login successful!");
+            window.location.href = "/shop";
+        } catch (err) {
+            setError(err.response?.data?.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+  
+   
+
+    return (
+        <div className="flex flex-col justify-center items-center h-screen">
+            
+                <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-96">
+                    <h2 className="text-2xl font-bold mb-4">Login</h2>
+                    {error && <p className="text-red-500">{error}</p>}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Email</label>
+                        <input
+                            type="email"
+                            className="w-full px-3 py-2 border rounded"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            className="w-full px-3 py-2 border rounded"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="bg-blue-500 text-white px-4 py-2 rounded w-full"
+                        disabled={loading}
+                    >
+                        {loading ? "Logging in..." : "Login"}
+                    </button>
+                </form>
+           
+        
         </div>
-        <img
-          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80"
-          alt=""
-          className="h-[65rem] w-[59%] xl:block md:hidden sm:hidden rounded-lg"
-        />
-      </section>
-    </div>
-  );
+    );
 };
 
 export default Login;

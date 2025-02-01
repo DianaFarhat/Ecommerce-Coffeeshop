@@ -13,6 +13,7 @@ import "./Navigation.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/userApiSlice";
 import { logout } from "../../redux/features/auth/authSlice";
+import axios from 'axios'
 // import FavoritesCount from "../Products/FavoritesCount";
 
 const Navigation = () => {
@@ -33,14 +34,46 @@ const Navigation = () => {
 
   const logoutHandler = async () => {
     try {
-      await logoutApiCall().unwrap();
-      dispatch(logout());
-      navigate("/login");
-    } catch (error) {
-      console.error(error);
-    }
-  };
+        // Call the logout API
+        const response = await axios.post(
+            "http://localhost:3000/api/users/logout",
+            {},
+            { withCredentials: true }
+        );
 
+        // Check if the logout was successful
+        if (response.status === 200) {
+            // Remove the token from localStorage (if used)
+            localStorage.removeItem("token");
+            localStorage.removeItem("userInfo");
+            localStorage.removeItem("expirationTime");
+
+
+
+          
+            // Show success message
+            alert("Logged out successfully!");
+
+            // Redirect to the homepage
+            navigate('/login')
+                  } else {
+            alert("Logout failed. Please try again.");
+        }
+    } catch (err) {
+        // Handle specific errors
+        if (err.response) {
+            // Server responded with an error status code (e.g., 401, 500)
+            alert(`Logout failed: ${err.response.data.message || "Server error"}`);
+        } else if (err.request) {
+            // Request was made but no response was received
+            alert("Logout failed: No response from the server.");
+        } else {
+            // Something else went wrong
+            alert("Logout failed: An unexpected error occurred.");
+        }
+        console.error("Logout error:", err);
+    }
+};
   return (
     <div
       style={{ zIndex: 9999 }}
@@ -116,62 +149,11 @@ const Navigation = () => {
           )}
         </button>
 
-        {dropdownOpen && userInfo && (
-          <ul
-            className={`absolute right-0 mt-2 mr-14 space-y-2 bg-white text-gray-600 ${
-              !userInfo.isAdmin ? "-top-20" : "-top-80"
-            } `}
-          >
-            {userInfo.isAdmin && (
+      
               <>
-                <li>
-                  <Link
-                    to="/admin/dashboard"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/productlist"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Products
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/categorylist"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Category
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/orderlist"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Orders
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/userlist"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Users
-                  </Link>
-                </li>
-              </>
-            )}
-
-            <li>
-              <Link to="/profile" className="block px-4 py-2 hover:bg-gray-100">
-                Profile
-              </Link>
-            </li>
+              <ul>
+     
+            
             <li>
               <button
                 onClick={logoutHandler}
@@ -181,8 +163,8 @@ const Navigation = () => {
               </button>
             </li>
           </ul>
-        )}
-        {!userInfo && (
+    
+       
           <ul>
             <li>
               <Link
@@ -203,10 +185,9 @@ const Navigation = () => {
               </Link>
             </li>
           </ul>
-        )}
-      </div>
+  </>
+          </div>
     </div>
-  );
-};
+  )}
 
 export default Navigation;
