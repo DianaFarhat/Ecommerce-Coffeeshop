@@ -3,6 +3,20 @@ import Loader from "./Loader";
 import SmallProduct from "../pages/Products/SmallProduct.jsx";
 // import ProductCarousel from "../pages/Products/ProductCarousel";
 
+
+// TODO: HuXn - Add navigation links and styling to the Header component & has it as header.jsx not .js
+/*
+export const Header= ()=> {
+  return (
+    <div>
+      Header
+    </div>
+  )
+};
+*/
+
+
+
 const Header = () => {
   const { data, isLoading, error } = useGetTopProductsQuery();
 
