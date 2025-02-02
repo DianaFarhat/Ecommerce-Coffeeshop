@@ -9,6 +9,8 @@ import Login from "./pages/Auth/Login.jsx"
 import Register from './pages/Auth/Register.jsx'
 import Home from './pages/User/Home.jsx'
 import Cart from './pages/User/Cart.jsx'
+import Shop from './pages/Shop.jsx'
+
 
 // Define the router
 const router = createBrowserRouter(
@@ -19,6 +21,8 @@ const router = createBrowserRouter(
        <Route index={true } path="/" element={<Home/>} />
 
        <Route  path="/cart" element={<Cart/>} />
+       <Route  path="/shop" element={<Shop/>} />
+
 
 
 
