@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import Loader from './components/Loader';
-import Message from './components/Message';
+import Loader from '../../components/Loader.js';
+import Message from '../../components/Message.js';
 
-import Product from './pages/Products/Product.jsx';
-import { useGetProductsQuery } from './redux/api/productApiSlice'; // Correct the import
+import Product from '../Products/Product.jsx';
+import { useGetProductsQuery } from '../../redux/api/productApiSlice.js'; // Correct the import
 
-import Header from './components/Header';
+import Header from '../../components/Header.js';
 const Home = () => {
   const { keyword } = useParams();
   const { data, isLoading, isError } = useGetProductsQuery({ keyword });
