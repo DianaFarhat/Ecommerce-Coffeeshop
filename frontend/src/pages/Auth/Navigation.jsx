@@ -165,6 +165,7 @@ const Navigation = () => {
           </ul>
     
        
+          {!userInfo && (
           <ul>
             <li>
               <Link
@@ -185,6 +186,7 @@ const Navigation = () => {
               </Link>
             </li>
           </ul>
+        )}
   </>
           </div>
     </div>
