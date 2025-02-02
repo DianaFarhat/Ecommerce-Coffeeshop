@@ -9,7 +9,7 @@ mongoose.set('strictQuery', true);
 // Debug: print the environment variables loaded by dotenv
 console.log('Loaded environment variables:', process.env);
 
-const DB_URL = "mongodb+srv://marwahbikai:IUduvwgBAp5sPRz6@cluster0.cuade.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const DB_URL = process.env.DB_URL;
 
 // Connect to DB
 exports.connectToDatabase = async () => {
