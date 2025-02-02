@@ -6,6 +6,8 @@ const userRouter=require("./routes/userRouter")
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const categoryRouter=require("./routes/categoryRouter")
+const productRouter=require("./routes/productRouter")
+
 // Run the database connection
 connectToDatabase();
 
@@ -26,6 +28,7 @@ app.options('*', cors());
 
 app.use("/api/users", userRouter)
 app.use("/api/category", categoryRouter)
+app.use("/api/product", productRouter)
 
 
 app.get("/", (req,res)=>{res.send("hello")})
