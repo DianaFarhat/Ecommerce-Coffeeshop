@@ -48,4 +48,11 @@ const Home = () => {
   );
 };
 
+//TODO: HuXn's version
+/*
+const Home= () =>{
+  return <div className="border">Home</div>
+};
+*/
+
 export default Home;
