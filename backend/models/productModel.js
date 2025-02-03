@@ -1,78 +1,36 @@
-const mongoose= require("mongoose");
-const Schema= mongoose.Schema;
+import mongoose from "mongoose";
+const { ObjectId } = mongoose.Schema;
 
-const productSchema= new mongoose.Schema({
-    productName: {
-        type: String,
-        required: [true, "Add the product name"],
-        trim: true,
-        minLength:3,
-        unique: true,
+const reviewSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    rating: { type: Number, required: true },
+    comment: { type: String, required: true },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
     },
-    productDescription:{
-        type: String,
-        trim: true,
-        minLength:3,
-        maxLength: 255,
-    },
-    productCategory:{
-        type: String,
-        required: [true, "Please enter product category"],
-        trim: true,
-        minLength:3,
-        maxLength: 255,
-    },
-    productSubCategory:{
-        type: String,
-        required: [true, "Please enter product subcategory"],
-        trim: true,
-        minLength:3,
-        maxLength: 255,
-    },
-    productImage:{
-        type: String,
-        required: [true, "Please enter imageUrl"]
-    },
-    sizes: [{
-        size: {
-          type: String,
-          required: true,
-          enum: ['Regular', 'Medium', 'Large'], 
-        },
-        price: {
-          type: Schema.Types.Decimal128,
-          required: true,
-          default: 0.00,
-          min: 0.00, 
-        }
-    }],
-
-    productQuantity:{
-        type:Number,
-        default:0,
-        required: [true, "Add the product quantity"]
-    },
-
-    options: [{
-        optionType: {
-          type: String, // e.g., "Egg Type"
-          required: true
-        },
-        values: [{
-          type: String, // e.g., "Sunny-side-up"
-          required: true
-        }]
-    }],
-
-    createdBy:{
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-
-    }
-      
-
-},
-{timestamps: true}
+  },
+  { timestamps: true }
 );
 
-module.exports= mongoose.model("Product", productSchema);
+const productSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    image: { type: String, required: true },
+    brand: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    category: { type: ObjectId, ref: "Category", required: true },
+    description: { type: String, required: true },
+    reviews: [reviewSchema],
+    rating: { type: Number, required: true, default: 0 },
+    numReviews: { type: Number, required: true, default: 0 },
+    price: { type: Number, required: true, default: 0 },
+    countInStock: { type: Number, required: true, default: 0 },
+  },
+  { timestamps: true }
+);
+
+const Product = mongoose.model("Product", productSchema);
+export default Product;
