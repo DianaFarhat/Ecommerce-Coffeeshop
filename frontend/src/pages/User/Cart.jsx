@@ -49,9 +49,20 @@ const Cart = () => {
                       {item.name}
                     </Link>
 
-                    <div className="mt-2 text-white">{item.brand}</div>
-                    <div className="mt-2 text-white font-bold">
-                      $ {item.price}
+                    {/* Display Original Price & Discount */}
+  <div className="mt-2 text-white font-bold">
+    <span className="line-through text-gray-400">
+      ${item.price.toFixed(2)}
+    </span>{" "}
+    <span className="text-green-400 ml-2">
+      -{item.discount}% OFF
+    </span>
+  </div>
+
+
+                    <div className="mt-2 text-black">{item.brand}</div>
+                    <div className="mt-2 text-black font-bold">
+                    $ {(item.price * (1 - item.discount / 100)).toFixed(2)}
                     </div>
                   </div>
 
@@ -91,8 +102,9 @@ const Cart = () => {
                   <div className="text-2xl font-bold">
                     ${" "}
                     {cartItems
-                      .reduce((acc, item) => acc + item.qty * item.price, 0)
-                      .toFixed(2)}
+  .reduce((acc, item) => acc + item.qty * ((item.price * (100 - item.discount)) / 100), 0)
+  .toFixed(2)}
+
                   </div>
 
                   <button

@@ -11,10 +11,28 @@ const ProductCard = ({ p }) => {
   const dispatch = useDispatch();
 
   const addToCartHandler = (product, qty) => {
-    dispatch(addToCart({ ...product, qty }));
-    toast.success("Item added successfully");
+    dispatch((dispatch, getState) => {
+      const existingItem = getState().cart.cartItems.find((x) => x._id === product._id);
+      const updatedQty = existingItem ? existingItem.qty + qty : qty;
+  
+      dispatch(addToCart({ ...product, qty: updatedQty }));
+      toast.success("Item added successfully");
+    });
   };
+  
 
+
+  // dispatch(addToCart({
+  //   _id: "3",
+  //   name: "Gaming Laptop",
+  //   image: "/images/laptop.jpg",
+  //   price: 1200,
+  //   countInStock: 10,
+  //   qty: 1,
+  //   isBundle: true,       // This product is part of a bundle
+  //   discount: 10          // 10% discount applied
+  // }));
+  
   return (
     <div className="max-w-sm relative bg-[#1A1A1A] rounded-lg shaodw dark:bg-gray-800 dark:border-gray-700">
       <section className="relative">

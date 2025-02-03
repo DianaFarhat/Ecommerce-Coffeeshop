@@ -41,18 +41,29 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action) => {
       const { user, rating, numReviews, reviews, ...item } = action.payload;
+    
+      // Ensure isBundle and discount exist in the payload
+      const newItem = {
+        ...item,
+        isBundle: item.isBundle || false,  // Default to false if not provided
+        discount: item.discount || 10,      // Default to 0 if not provided
+      };
+    
       const existItem = state.cartItems.find((x) => x._id === item._id);
-
+    
       if (existItem) {
+        // Update item quantity if it exists, preserve discount
         state.cartItems = state.cartItems.map((x) =>
-          x._id === existItem._id ? item : x
+          x._id === existItem._id ? { ...x, qty: x.qty + newItem.qty, discount: newItem.discount } : x
         );
       } else {
-        state.cartItems = [...state.cartItems, item];
+        state.cartItems = [...state.cartItems, newItem];
       }
-      return updateCart(state, item);
+    
+      // Call the updateCart function to calculate and update the cart totals
+      return updateCart(state);
     },
-
+    
     removeFromCart: (state, action) => {
       state.cartItems = state.cartItems.filter((x) => x._id !== action.payload);
       return updateCart(state);
