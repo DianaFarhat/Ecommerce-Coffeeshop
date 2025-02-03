@@ -54,7 +54,7 @@ const cartSlice = createSlice({
       if (existItem) {
         // Update item quantity if it exists, preserve discount
         state.cartItems = state.cartItems.map((x) =>
-          x._id === existItem._id ? { ...x, qty: x.qty + newItem.qty, discount: newItem.discount } : x
+          x._id === existItem._id ? { ...x, qty: newItem.qty, discount: newItem.discount } : x
         );
       } else {
         state.cartItems = [...state.cartItems, newItem];

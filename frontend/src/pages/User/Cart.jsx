@@ -8,6 +8,8 @@ const Cart = () => {
   const dispatch = useDispatch();
 
   const cart = useSelector((state) => state.cart);
+  const { itemsPricebeforeDiscount, itemsPriceAfterDiscount, shippingPrice, taxPrice, totalPrice } = cart;
+
   const { cartItems } = cart;
 
   const addToCartHandler = (product, qty) => {
@@ -106,6 +108,25 @@ const Cart = () => {
   .toFixed(2)}
 
                   </div>
+
+
+
+                  <div className="text-2xl font-bold">
+      Subtotal: ${itemsPricebeforeDiscount}
+    </div>
+    <div className="text-2xl font-bold">
+      Discount: -${(itemsPricebeforeDiscount - itemsPriceAfterDiscount).toFixed(2)}
+    </div>
+    <div className="text-2xl font-bold">
+      Shipping: ${shippingPrice}
+    </div>
+    <div className="text-2xl font-bold">
+      Taxes: ${taxPrice}
+    </div>
+    <div className="text-2xl font-bold">
+      <span className="font-bold">Final Total:</span> ${totalPrice}
+    </div>
+
 
                   <button
                     className="bg-pink-500 mt-4 py-2 px-4 rounded-full text-lg w-full"
