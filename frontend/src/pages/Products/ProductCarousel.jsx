@@ -21,7 +21,7 @@ const ProductCarousel = () => {
     infinite: true,
     speed: 500,
     slidesToShow: 1,
-    slidesToScroll,
+    slidesToScroll:1,
     arrows: true,
     autoplay: true,
     autoplaySpeed: 3000,
