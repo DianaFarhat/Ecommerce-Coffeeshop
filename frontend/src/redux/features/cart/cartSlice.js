@@ -46,7 +46,7 @@ const cartSlice = createSlice({
       const newItem = {
         ...item,
         isBundle: item.isBundle || false,  // Default to false if not provided
-        discount: item.discount || 10,      // Default to 0 if not provided
+        discount: item.discount || 0,      // Default to 0 if not provided
       };
     
       const existItem = state.cartItems.find((x) => x._id === item._id);
