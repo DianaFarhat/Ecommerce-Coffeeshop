@@ -43,6 +43,6 @@ router
 //   .put(authenticate, authorizeAdmin, formidable(), updateProductDetails)
 //   .delete(authenticate, authorizeAdmin, removeProduct);
 
-router.route("/filtered-products").post(filterProducts);
+router.post("/filter", filterProducts);
 
 module.exports = router; 

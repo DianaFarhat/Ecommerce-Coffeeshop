@@ -28,7 +28,7 @@ app.options('*', cors());
 
 app.use("/api/users", userRouter)
 app.use("/api/category", categoryRouter)
-app.use("/api/product", productRouter)
+app.use("/api/products", productRouter)
 
 
 app.get("/", (req,res)=>{res.send("hello")})
