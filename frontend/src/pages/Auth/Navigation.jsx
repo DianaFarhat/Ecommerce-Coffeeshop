@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import {
   AiOutlineHome,
   AiOutlineShopping,
@@ -14,11 +14,26 @@ import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/userApiSlice";
 import { logout } from "../../redux/features/auth/authSlice";
 import axios from 'axios'
+
 // import FavoritesCount from "../Products/FavoritesCount";
 
 const Navigation = () => {
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+  const loggedInUserId = storedUser?.data?.user._id; // Extract user ID safely
   const { userInfo } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
+
+  useEffect(() => {
+    if (userInfo) {
+      // Clear the cart whenever the user logs in
+      console.log("useEffect!")
+    }
+  }, [userInfo, dispatch]);
+
+
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -27,8 +42,7 @@ const Navigation = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+
 
   const [logoutApiCall] = useLogoutMutation();
 
@@ -106,14 +120,15 @@ const Navigation = () => {
           </div>
 
           <div className="absolute top-9">
-            {cartItems.length > 0 && (
-              <span>
-                <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
-                  {cartItems.reduce((a, c) => a + c.qty, 0)}
-                </span>
-              </span>
-            )}
-          </div>
+  {loggedInUserId && cartItems.length > 0 && (
+    <span>
+      <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
+        {cartItems.reduce((a, c) => a + c.qty, 0)}
+      </span>
+    </span>
+  )}
+</div>
+
         </Link>
 
      
