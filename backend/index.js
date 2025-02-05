@@ -31,6 +31,7 @@ app.use("/api/category", categoryRouter)
 app.use("/api/products", productRouter)
 
 
+
 app.get("/", (req,res)=>{res.send("hello")})
 
 
