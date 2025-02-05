@@ -1,6 +1,8 @@
 import { PRODUCT_URL } from "../constants";
 import { apiSlice } from "./apiSlice";
 
+
+//TODO: Might need to delete this file and replace it with axios
 export const productApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getProducts: builder.query({

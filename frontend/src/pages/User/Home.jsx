@@ -8,6 +8,7 @@ import { useGetProductsQuery } from '../../redux/api/productApiSlice.js'; // Cor
 
 import Header from '../../components/Header.js';
 
+//TODO: Adjust this to axios and import productApiaxios.js
 const Home = () => {
   const { keyword } = useParams();
   const { data, isLoading, isError } = useGetProductsQuery({ keyword });
@@ -48,11 +49,5 @@ const Home = () => {
   );
 };
 
-//TODO: HuXn's version
-/*
-const Home= () =>{
-  return <div>Home</div>
-};
-*/
 
 export default Home;
