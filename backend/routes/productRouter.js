@@ -21,10 +21,9 @@ const router = express.Router();
 //   .get(fetchProducts)
 //   .post(authenticate, authorizeAdmin, formidable(), addProduct);
 
-router
-  .route("/")
-  .get(fetchProducts)
 
+
+router.route("/").get(fetchProducts)
 
 router.route("/allproducts").get(fetchAllProducts);
 router.route("/:id/reviews").post(authenticate, checkId, addProductReview);
