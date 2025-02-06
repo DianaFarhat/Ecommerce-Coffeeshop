@@ -1,17 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Loader from '../../components/Loader.js';
 import Message from '../../components/Message.js';
-
 import Product from '../Products/Product.jsx';
-import { useGetProductsQuery } from '../../redux/api/productApiSlice.js'; // Correct the import
-
 import Header from '../../components/Header.js';
 
-//TODO: Adjust this to axios and import productApiaxios.js
-const Home = () => {
+
+/* const Home = () => {
   const { keyword } = useParams();
-  const { data, isLoading, isError } = useGetProductsQuery({ keyword });
+  const [data, setData] = useState({ products: [] });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(null);
+
+  useEffect(() => {
+    const getProductsData = async () => {
+      setIsLoading(true);
+      try {
+        const products = await getProducts(keyword); // Use the axios function to get products
+        setData({ products });
+        setIsLoading(false);
+      } catch (error) {
+        setIsError(error?.response?.data?.message || 'An error occurred');
+        setIsLoading(false);
+      }
+    };
+
+    getProductsData();
+  }, [keyword]); // Depend on keyword to refetch on change
 
   return (
     <>
@@ -20,7 +35,7 @@ const Home = () => {
         <Loader />
       ) : isError ? (
         <Message variant="danger">
-          {isError?.data?.message || isError?.error || "An error occurred"}
+          {isError || "An error occurred"}
         </Message>
       ) : (
         <>
@@ -49,5 +64,33 @@ const Home = () => {
   );
 };
 
+export default Home; */
+
+
+/* const Home= ()=>{
+  return <div className='border'>Home</div>
+}
+ */
+
+
+
+const Home = () => {
+  const { keyword } = useParams();
+
+  return (
+    <>
+      {!keyword && <Header />}
+      <h1 className="ml-[20rem] mt-[10rem] text-[3rem]">Special Products</h1>
+      <Link
+        to="/shop"
+        className="bg-pink-600 font-bold rounded-full py-2 px-10 mr-[18rem] mt-[10rem]"
+      >
+        Shop
+      </Link>
+    </>
+  );
+};
 
 export default Home;
+
+

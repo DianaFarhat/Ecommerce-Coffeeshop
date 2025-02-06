@@ -1,9 +1,8 @@
 import axios from "axios";
-import api from '../api';
+import api from "../api/api";  // Correct the import if needed
 
-
-
-const getProducts = async (keyword) => {
+// Export the functions
+export const getProducts = async (keyword) => {
   try {
     const response = await api.get('/', { params: { keyword } });
     return response.data;
@@ -13,7 +12,7 @@ const getProducts = async (keyword) => {
   }
 };
 
-const getProductById = async (productId) => {
+export const getProductById = async (productId) => {
   try {
     const response = await api.get(`/${productId}`);
     return response.data;
@@ -23,7 +22,7 @@ const getProductById = async (productId) => {
   }
 };
 
-const getAllProducts = async () => {
+export const getAllProducts = async () => {
   try {
     const response = await api.get('/allProducts');
     return response.data;
@@ -33,7 +32,7 @@ const getAllProducts = async () => {
   }
 };
 
-const createReview = async (productId, reviewData) => {
+export const createReview = async (productId, reviewData) => {
   try {
     const response = await api.post(`/${productId}/reviews`, reviewData);
     return response.data;
@@ -43,7 +42,7 @@ const createReview = async (productId, reviewData) => {
   }
 };
 
-const getTopProducts = async () => {
+export const getTopProducts = async () => {
   try {
     const response = await api.get('/top');
     return response.data;
@@ -53,7 +52,7 @@ const getTopProducts = async () => {
   }
 };
 
-const getNewProducts = async () => {
+export const getNewProducts = async () => {
   try {
     const response = await api.get('/new');
     return response.data;
@@ -63,7 +62,7 @@ const getNewProducts = async () => {
   }
 };
 
-const getFilteredProducts = async (checked, radio) => {
+export const getFilteredProducts = async (checked, radio) => {
   try {
     const response = await api.post('/filtered-products', { checked, radio });
     return response.data;
