@@ -16,7 +16,7 @@ const Home = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/products?keyword=${keyword || ""}`);
+        const { data } = await axios.get(`http://localhost:3000/api/products?keyword=${keyword || ""}`);
         setData({ products: data.products });
         setIsLoading(false);
       } catch (error) {
