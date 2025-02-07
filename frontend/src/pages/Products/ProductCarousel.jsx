@@ -8,6 +8,7 @@ import moment from "moment";
 import {
   FaBox,
   FaClock,
+  FaComment,
   FaShoppingCart,
   FaStar,
   FaStore,
@@ -90,7 +91,43 @@ const ProductCarousel = () => {
                 alt={name}
                 className="w-full rounded-lg object-cover h-[30rem]"
               />
+
+              <div className="flex justify-between w-[20rem]">
+                <div className="one">
+                  <h2>{name}</h2>
+                  <p>$ {price}</p> <br/> <br/>
+                  <p> {description}</p> <br/> <br/>
+                </div>
+
+                <div className="flex justify-between w-[20rem]">
+                  <div className="one">
+                    <h1 className="flex items-center mb-6 w-[8rem]">
+                      <FaStore className="mr-2 text-white"/> Brand: {" "}{brand}
+                    </h1>
+                    <h1 className="flex items-center mb-6 w-[8rem]">
+                      <FaStar className="mr-2 text-white"/> Added: {" "}{moment(createdAt).fromNow()}
+                    </h1>
+                    <h1 className="flex items-center mb-6 w-[8rem]">
+                      <FaStar className="mr-2 text-white"/> Reviews:{" "} {numReviews}
+                    </h1>
+                  </div>
+
+                  <div className="two">
+                    <h1 className="flex items-center mb-6 w-[5rem]">
+                      <FaStar className="mr-2 text-white"/> Ratings: {" "}{Math.round(rating)}
+                    </h1>
+                    <h1 className="flex items-center mb-6 w-[5rem]">
+                      <FaShoppingCart className="mr-2 text-white"/> {" "} Quantity:{quantity}
+                    </h1>
+                    <h1 className="flex items-center mb-6 w-[8rem]">
+                      <FaStar className="mr-2 text-white"/> Reviews:{" "} {numReviews}
+                    </h1>
+                  </div>
+                </div>
+              </div>
+
             </div>
+            
           )
         )}
       </Slider>

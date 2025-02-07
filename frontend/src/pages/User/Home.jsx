@@ -6,6 +6,11 @@ import Message from "../../components/Message.js";
 import Product from "../Products/Product.jsx";
 import Header from "../../components/Header.js";
 
+
+
+
+
+
 const Home = () => {
   const { keyword } = useParams();
   const [data, setData] = useState({ products: [] });
@@ -62,9 +67,9 @@ const Home = () => {
 
 export default Home;
 
+ 
 
-
-
+ 
 
 
 
