@@ -11,7 +11,11 @@ import Home from './pages/User/Home.jsx'
 import Cart from './pages/User/Cart.jsx'
 import Shop from './pages/Shop.jsx'
 import ProductDetails from "./pages/Products/ProductDetails.jsx";
-
+import PlaceOrder from './pages/Orders/PlaceOrder.jsx'
+import Order from './pages/Orders/Order.jsx'
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import Shipping from './pages/Orders/Shipping.jsx'
+import PrivateRoute from './components/PrivateRoutex.jsx'
 
 // Define the router
 const router = createBrowserRouter(
@@ -20,22 +24,27 @@ const router = createBrowserRouter(
        <Route path="/login" element={<Login/>} />
        <Route path="/register" element={<Register/>} />
        <Route index={true } path="/" element={<Home/>} />
-
        <Route  path="/cart" element={<Cart/>} />
        <Route  path="/shop" element={<Shop/>} />
        <Route  path="/product/:id" element={<ProductDetails/>} />
+       <Route path="" element={<PrivateRoute />}>
+        {/* <Route path="/profile" element={<Profile />} /> */}
+        <Route path="/shipping" element={<Shipping />} />
+        <Route path="/placeorder" element={<PlaceOrder />} />
+        <Route path="/order/:id" element={<Order />} />
+      </Route>
 
-
-
-       
     </Route>
+
+    
   )
 );
 
 // ✅ Wrap the entire application inside <Provider>
 ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>  
-    <RouterProvider router={router} />
+    <PayPalScriptProvider><RouterProvider router={router} /></PayPalScriptProvider>
+    
   </Provider>
 
   

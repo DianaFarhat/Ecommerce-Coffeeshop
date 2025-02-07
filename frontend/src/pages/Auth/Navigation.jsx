@@ -131,6 +131,17 @@ const Navigation = () => {
 
         </Link>
 
+        
+        <Link to="/orders" className="flex relative">
+          <div className="flex items-center transition-transform transform hover:translate-x-2">
+            <AiOutlineShoppingCart className="mt-[3rem] mr-2" size={26} />
+            <span className="hidden nav-item-name mt-[3rem]">My Orders</span>{" "}
+          </div>
+
+ 
+
+        </Link>
+
      
       </div>
 

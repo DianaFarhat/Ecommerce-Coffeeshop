@@ -43,7 +43,10 @@ const Header = () => {
               <SmallProduct product={product} />
             </div>
           ))}
+
+
         </div>
+
       </div>
       <ProductCarousel/>
     </div>

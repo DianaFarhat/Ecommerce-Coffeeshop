@@ -131,8 +131,11 @@ const ProductCarousel = () => {
           )
         )}
       </Slider>
+
     </div>
   );
 };
+
+
 
 export default ProductCarousel;
