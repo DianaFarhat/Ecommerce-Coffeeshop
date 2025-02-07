@@ -11,8 +11,11 @@ import Home from './pages/User/Home.jsx'
 import Cart from './pages/User/Cart.jsx'
 import Shop from './pages/Shop.jsx'
 import ProductDetails from "./pages/Products/ProductDetails.jsx";
-
-
+import Shipping from './pages/Orders/Shipping.jsx'
+import PlaceOrder from './pages/Orders/PlaceOrder.jsx'
+import Order from './pages/Orders/Order.jsx'
+import PrivateRoute from './components/PrivateRoutex.jsx'
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 // Define the router
 const router = createBrowserRouter(
   createRoutesFromElements(
