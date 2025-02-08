@@ -105,7 +105,9 @@ exports.getAllOrders = async (req, res) => {
 
 exports.getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id });
+    const { userId } = req.query; // Get userId from query parameters
+
+    const orders = await Order.find({ userId });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });
