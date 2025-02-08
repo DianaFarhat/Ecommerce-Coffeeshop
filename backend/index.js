@@ -8,6 +8,9 @@ const cookieParser = require("cookie-parser");
 const categoryRouter=require("./routes/categoryRouter")
 const productRouter=require("./routes/productRouter")
 const orderRoutes= require('./routes/orderRouter')
+const dotenv=require("dotenv"); 
+       
+dotenv.config();
 
 // Run the database connection
 connectToDatabase();
@@ -36,7 +39,9 @@ app.use("/api/orders", orderRoutes)
 
 app.get("/", (req,res)=>{res.send("hello")})
 
-
+app.get("/api/config/paypal", (req, res) => {
+    res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
+});
 
 //Set up port
 app.listen(3000, ()=>{

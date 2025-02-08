@@ -216,3 +216,31 @@ exports.markOrderAsDelivered = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.cancelOrder = async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  const { userId } = req.query; // Get userId from query parameters
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  // Ensure the user requesting the cancellation owns the order
+  if (order.user.toString() !== userId.toString()) {
+    res.status(403);
+    throw new Error("You are not authorized to cancel this order");
+  }
+
+  // Prevent canceling a paid order
+  if (order.isPaid) {
+    res.status(400);
+    throw new Error("Cannot cancel a paid order");
+  }
+
+  // Delete the order from the database
+  await Order.deleteOne({ _id: order._id });
+
+  res.json({ message: "Order has been successfully removed" });
+};
