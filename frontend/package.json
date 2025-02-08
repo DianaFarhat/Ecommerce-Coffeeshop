@@ -4,7 +4,7 @@
   "private": true,
   "main": "src/index.js",
   "dependencies": {
-    "@paypal/react-paypal-js": "^8.8.1",
+    "@paypal/react-paypal-js": "^8.8.2",
     "@reduxjs/toolkit": "^2.5.1",
     "axios": "^1.7.9",
     "cors": "^2.8.5",

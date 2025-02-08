@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import Message from "../../components/Message";
 import ProgressSteps from "../../components/ProgressSteps";
@@ -8,6 +8,8 @@ import Loader from "../../components/Loader";
 import { useCreateOrderMutation } from "../../redux/api/orderApiSlice";
 import { clearCartItems } from "../../redux/features/cart/cartSlice";
 import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
+
 const PlaceOrder = () => {
   const navigate = useNavigate();
 
@@ -52,15 +54,17 @@ const PlaceOrder = () => {
             withCredentials: true, // Ensure cookies are sent
           }
         );
-    
+     dispatch(clearCartItems());
         toast.success("Order placed successfully!");
 
-        dispatch(clearCartItems());
        
 
         setTimeout(() => {
           navigate(`/order/${data._id}`);
-      }, 5000); // 2000 ms = 2 seconds
+      }, 2000); // 2000 ms = 2 seconds
+
+     
+
        
       } catch (error) {
         toast.error(error?.response?.data?.message || error.message || "Something went wrong");
