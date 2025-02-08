@@ -3,7 +3,7 @@ const router = express.Router();
 
 const  {
   createOrder,
-  getAllOrders,
+  getAllOrders,cancelOrder,
   getUserOrders,
   countTotalOrders,
   calculateTotalSales,
@@ -29,5 +29,8 @@ router.route("/:id/pay").put(authenticate, markOrderAsPaid);
 router
   .route("/:id/deliver")
   .put(authenticate, markOrderAsDelivered);
+
+  router.delete("/:id/cancel",authenticate, cancelOrder); // Change to DELETE method
+
 
   module.exports = router; 
