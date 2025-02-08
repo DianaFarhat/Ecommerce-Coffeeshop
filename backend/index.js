@@ -7,6 +7,7 @@ const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const categoryRouter=require("./routes/categoryRouter")
 const productRouter=require("./routes/productRouter")
+const orderRoutes= require('./routes/orderRouter')
 
 // Run the database connection
 connectToDatabase();
@@ -29,6 +30,7 @@ app.options('*', cors());
 app.use("/api/users", userRouter)
 app.use("/api/category", categoryRouter)
 app.use("/api/products", productRouter)
+app.use("/api/orders", orderRoutes)
 
 
 

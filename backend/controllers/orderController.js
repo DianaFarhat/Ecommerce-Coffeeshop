@@ -1,6 +1,6 @@
 const Order =require ("../models/orderModel.js");
 const Product = require ("../models/productModel.js");
-
+const mongoose =require("mongoose")
 // Utility Function
 function calcPrices(orderItems) {
   const itemsPrice = orderItems.reduce(
@@ -74,7 +74,7 @@ exports.createOrder = async (req, res) => {
 
     const order = new Order({
       orderItems: dbOrderItems,
-      user: mongoose.Types.ObjectId(user), // ✅ Convert user to ObjectId
+      user: new mongoose.Types.ObjectId(user), // ✅ Convert user to ObjectId
       shippingAddress,
       paymentMethod,
       itemsPrice,
@@ -216,4 +216,3 @@ exports.markOrderAsDelivered = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
