@@ -1,227 +1,166 @@
-import { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
+
+import axios from "axios";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
-import Messsage from "../../components/Message";
+import { toast, ToastContainer } from "react-toastify";
+import Message from "../../components/Message";
 import Loader from "../../components/Loader";
-import {
-  useDeliverOrderMutation,
-  useGetOrderDetailsQuery,
-  useGetPaypalClientIdQuery,
-  usePayOrderMutation,
-} from "../../redux/api/orderApiSlice";
+import "react-toastify/dist/ReactToastify.css";
 
 const Order = () => {
   const { id: orderId } = useParams();
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingDeliver, setLoadingDeliver] = useState(false);
 
-  const {
-    data: order,
-    refetch,
-    isLoading,
-    error,
-  } = useGetOrderDetailsQuery(orderId);
-
-  const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
-  const [deliverOrder, { isLoading: loadingDeliver }] =
-    useDeliverOrderMutation();
   const { userInfo } = useSelector((state) => state.auth);
 
-  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
+  const navigate = useNavigate();
 
-  const {
-    data: paypal,
-    isLoading: loadingPaPal,
-    error: errorPayPal,
-  } = useGetPaypalClientIdQuery();
 
-  useEffect(() => {
-    if (!errorPayPal && !loadingPaPal && paypal.clientId) {
-      const loadingPaPalScript = async () => {
-        paypalDispatch({
-          type: "resetOptions",
-          value: {
-            "client-id": paypal.clientId,
-            currency: "USD",
-          },
+  const cancelOrderHandler = async () => {
+
+    const userInfo = JSON.parse(localStorage.getItem("userInfo")); // Parse stored string to object
+    const userId = userInfo?.data?.user?._id; // Extract user _id
+
+    if (window.confirm("Are you sure you want to cancel this order?")) {
+      try {
+        await axios.delete(`http://localhost:3000/api/orders/${orderId}/cancel?userId=${userId}`,
+        {
+          withCredentials: true,
         });
-        paypalDispatch({ type: "setLoadingStatus", value: "pending" });
-      };
-
-      if (order && !order.isPaid) {
-        if (!window.paypal) {
-          loadingPaPalScript();
-        }
+        toast.success("Order has been canceled successfully.");
+  
+        setTimeout(() => {
+          navigate("/shop");
+        }, 2000); // 2seconds
+        
+      } catch (error) {
+        toast.error(error.response?.data?.message || error.message);
       }
     }
-  }, [errorPayPal, loadingPaPal, order, paypal, paypalDispatch]);
+  };
+  
 
-  function onApprove(data, actions) {
-    return actions.order.capture().then(async function (details) {
+  useEffect(() => {
+    const fetchOrder = async () => {
       try {
-        await payOrder({ orderId, details });
-        refetch();
-        toast.success("Order is paid");
+        const { data } = await axios.get(`http://localhost:3000/api/orders/${orderId}`, {
+          withCredentials: true,
+        });
+        console.log("Order is", data);
+        setOrder(data);
       } catch (error) {
-        toast.error(error?.data?.message || error.message);
+        toast.error(error.response?.data?.message || error.message);
+      } finally {
+        setLoading(false);
       }
-    });
-  }
-
-  function createOrder(data, actions) {
-    return actions.order
-      .create({
-        purchase_units: [{ amount: { value: order.totalPrice } }],
-      })
-      .then((orderID) => {
-        return orderID;
-      });
-  }
-
-  function onError(err) {
-    toast.error(err.message);
-  }
+    };
+    fetchOrder();
+  }, [orderId]);
 
   const deliverHandler = async () => {
-    await deliverOrder(orderId);
-    refetch();
+    try {
+      setLoadingDeliver(true);
+      await axios.put(`/api/orders/${orderId}/deliver`);
+      setOrder({ ...order, isDelivered: true });
+      toast.success("Order marked as delivered");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    } finally {
+      setLoadingDeliver(false);
+    }
   };
 
-  return isLoading ? (
+  return loading ? (
     <Loader />
-  ) : error ? (
-    <Messsage variant="danger">{error.data.message}</Messsage>
+  ) : !order ? (
+    <Message variant="danger">Order not found</Message>
   ) : (
-    <div className="container flex flex-col ml-[10rem] md:flex-row">
-      <div className="md:w-2/3 pr-4">
-        <div className="border gray-300 mt-5 pb-4 mb-5">
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Order Details</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Order Details */}
+        <div className="md:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
+          <p><span className="font-semibold">Name:</span> {order.user.username}</p>
+          <p><span className="font-semibold">Email:</span> {order.user.email}</p>
+          <p><span className="font-semibold">Address:</span> {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.postalCode}, {order.shippingAddress.country}</p>
+          <p className={`mt-2 p-2 text-white rounded-lg ${order.isDelivered ? "bg-green-500" : "bg-red-500"}`}>
+            {order.isDelivered ? `Delivered on ${order.deliveredAt}` : "Not Delivered"}
+          </p>
+
+          <h2 className="text-xl font-semibold mt-6 mb-4">Payment Details</h2>
+          <p><span className="font-semibold">Payment Method:</span> {order.paymentMethod}</p>
+          <p className={`mt-2 p-2 text-white rounded-lg ${order.isPaid ? "bg-green-500" : "bg-red-500"}`}>
+            {order.isPaid ? `Paid on ${order.paidAt}` : "Not Paid"}
+          </p>
+
+          <h2 className="text-xl font-semibold mt-6 mb-4">Order Items</h2>
           {order.orderItems.length === 0 ? (
-            <Messsage>Order is empty</Messsage>
+            <Message variant="warning">Order is empty</Message>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-[80%]">
-                <thead className="border-b-2">
-                  <tr>
-                    <th className="p-2">Image</th>
-                    <th className="p-2">Product</th>
-                    <th className="p-2 text-center">Quantity</th>
-                    <th className="p-2">Unit Price</th>
-                    <th className="p-2">Total</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {order.orderItems.map((item, index) => (
-                    <tr key={index}>
-                      <td className="p-2">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-16 h-16 object-cover"
-                        />
-                      </td>
-
-                      <td className="p-2">
-                        <Link to={`/product/${item.product}`}>{item.name}</Link>
-                      </td>
-
-                      <td className="p-2 text-center">{item.qty}</td>
-                      <td className="p-2 text-center">{item.price}</td>
-                      <td className="p-2 text-center">
-                        $ {(item.qty * item.price).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div>
+              {order.orderItems.map((item) => (
+                <div key={item.product} className="flex items-center justify-between border-b py-2">
+                  <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
+                  <p>{item.name}</p>
+                  <p>{item.qty} x ${item.price} = ${item.qty * item.price}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
-      </div>
 
-      <div className="md:w-1/3">
-        <div className="mt-5 border-gray-300 pb-4 mb-4">
-          <h2 className="text-xl font-bold mb-2">Shipping</h2>
-          <p className="mb-4 mt-4">
-            <strong className="text-pink-500">Order:</strong> {order._id}
-          </p>
-
-          <p className="mb-4">
-            <strong className="text-pink-500">Name:</strong>{" "}
-            {order.user.username}
-          </p>
-
-          <p className="mb-4">
-            <strong className="text-pink-500">Email:</strong> {order.user.email}
-          </p>
-
-          <p className="mb-4">
-            <strong className="text-pink-500">Address:</strong>{" "}
-            {order.shippingAddress.address}, {order.shippingAddress.city}{" "}
-            {order.shippingAddress.postalCode}, {order.shippingAddress.country}
-          </p>
-
-          <p className="mb-4">
-            <strong className="text-pink-500">Method:</strong>{" "}
-            {order.paymentMethod}
-          </p>
-
-          {order.isPaid ? (
-            <Messsage variant="success">Paid on {order.paidAt}</Messsage>
-          ) : (
-            <Messsage variant="danger">Not paid</Messsage>
-          )}
-        </div>
-
-        <h2 className="text-xl font-bold mb-2 mt-[3rem]">Order Summary</h2>
-        <div className="flex justify-between mb-2">
-          <span>Items</span>
-          <span>$ {order.itemsPrice}</span>
-        </div>
-        <div className="flex justify-between mb-2">
-          <span>Shipping</span>
-          <span>$ {order.shippingPrice}</span>
-        </div>
-        <div className="flex justify-between mb-2">
-          <span>Tax</span>
-          <span>$ {order.taxPrice}</span>
-        </div>
-        <div className="flex justify-between mb-2">
-          <span>Total</span>
-          <span>$ {order.totalPrice}</span>
-        </div>
-
-        {!order.isPaid && (
-          <div>
-            {loadingPay && <Loader />}{" "}
-            {isPending ? (
-              <Loader />
-            ) : (
-              <div>
-                <div>
-                  <PayPalButtons
-                    createOrder={createOrder}
-                    onApprove={onApprove}
-                    onError={onError}
-                  ></PayPalButtons>
-                </div>
-              </div>
-            )}
+        {/* Order Summary */}
+        <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+          <div className="flex justify-between">
+            <span>Items Price:</span>
+            <span>${order.itemsPrice.toFixed(2)}</span>
           </div>
-        )}
+          <div className="flex justify-between">
+            <span>Tax Price:</span>
+            <span>${order.taxPrice.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Shipping Price:</span>
+            <span>${order.shippingPrice.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between font-bold text-lg">
+            <span>Total Price:</span>
+            <span>${order.totalPrice.toFixed(2)}</span>
+          </div>
 
-        {loadingDeliver && <Loader />}
-        {userInfo && userInfo.isAdmin && order.isPaid && !order.isDelivered && (
-          <div>
-            <button
-              type="button"
-              className="bg-pink-500 text-white w-full py-2"
-              onClick={deliverHandler}
-            >
+          <h2 className="text-xl font-semibold mt-6 mb-4">Order Status</h2>
+        
+          {(!order.isPaid && !order.isDelivered) && (
+    <p className="p-2 rounded-lg text-white text-center bg-yellow-500 mt-2">Active</p>
+  )}
+
+{!order.isPaid && !order.isCanceled && (
+  <button
+    onClick={cancelOrderHandler}
+    className="mt-4 bg-red-500 text-white py-2 px-4 rounded-lg w-full"
+  >
+    Cancel Order
+  </button>
+)}
+          <h2 className="text-xl font-semibold mt-6 mb-4">Timestamps</h2>
+          <p><span className="font-semibold">Created At:</span> {new Date(order.createdAt).toLocaleString()}</p>
+          <p><span className="font-semibold">Updated At:</span> {new Date(order.updatedAt).toLocaleString()}</p>
+
+          {loadingDeliver && <Loader />}
+          {userInfo?.isAdmin && order.isPaid && !order.isDelivered && (
+            <button onClick={deliverHandler} className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg w-full">
               Mark As Delivered
             </button>
-          </div>
-        )}
+          )}
+        </div>
+        
       </div>
     </div>
   );
