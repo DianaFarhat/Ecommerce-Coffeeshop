@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrash } from "react-icons/fa";
-import { addToCart, removeFromCart } from "../../redux/features/cart/cartSlice";
+import { addToCart, removeFromCart, resetCart } from "../../redux/features/cart/cartSlice";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -10,22 +10,15 @@ const Cart = () => {
   const cart = useSelector((state) => state.cart);
   const { itemsPricebeforeDiscount, itemsPriceAfterDiscount, shippingPrice, taxPrice, totalPrice } = cart;
 
-
   const storedUser = JSON.parse(localStorage.getItem("userInfo"));
   const loggedInUserId = storedUser?.data?.user._id; // Extract user ID safely
 
   // Filter cart items belonging to the logged-in user
-
-  console.log(loggedInUserId)
-
   const { cartItems } = cart;
 
   const userCartItems = cartItems.filter(
     (item) => item.userId === loggedInUserId || !item.userId
   );
-  
-
-
 
   const addToCartHandler = (product, qty) => {
     dispatch(addToCart({ ...product, qty }));
@@ -37,6 +30,11 @@ const Cart = () => {
 
   const checkoutHandler = () => {
     navigate("/login?redirect=/shipping");
+  };
+
+  // Reset Cart Handler
+  const resetCartHandler = () => {
+    dispatch(resetCart());
   };
 
   return (
@@ -66,20 +64,18 @@ const Cart = () => {
                       {item.name}
                     </Link>
 
-                    {/* Display Original Price & Discount */}
-  <div className="mt-2 text-white font-bold">
-    <span className="line-through text-gray-400">
-      ${item.price.toFixed(2)}
-    </span>{" "}
-    <span className="text-green-400 ml-2">
-      -{item.discount}% OFF
-    </span>
-  </div>
-
+                    <div className="mt-2 text-white font-bold">
+                      <span className="line-through text-gray-400">
+                        ${item.price.toFixed(2)}
+                      </span>{" "}
+                      <span className="text-green-400 ml-2">
+                        -{item.discount}% OFF
+                      </span>
+                    </div>
 
                     <div className="mt-2 text-black">{item.brand}</div>
                     <div className="mt-2 text-black font-bold">
-                    $ {(item.price * (1 - item.discount / 100)).toFixed(2)}
+                      $ {(item.price * (1 - item.discount / 100)).toFixed(2)}
                     </div>
                   </div>
 
@@ -119,29 +115,29 @@ const Cart = () => {
                   <div className="text-2xl font-bold">
                     ${" "}
                     {userCartItems
-  .reduce((acc, item) => acc + item.qty * ((item.price * (100 - item.discount)) / 100), 0)
-  .toFixed(2)}
-
+                      .reduce(
+                        (acc, item) =>
+                          acc + item.qty * ((item.price * (100 - item.discount)) / 100),
+                        0
+                      )
+                      .toFixed(2)}
                   </div>
 
-
-
                   <div className="text-2xl font-bold">
-      Subtotal: ${itemsPricebeforeDiscount}
-    </div>
-    <div className="text-2xl font-bold">
-      Discount: -${(itemsPricebeforeDiscount - itemsPriceAfterDiscount).toFixed(2)}
-    </div>
-    <div className="text-2xl font-bold">
-      Shipping: ${shippingPrice}
-    </div>
-    <div className="text-2xl font-bold">
-      Taxes: ${taxPrice}
-    </div>
-    <div className="text-2xl font-bold">
-      <span className="font-bold">Final Total:</span> ${totalPrice}
-    </div>
-
+                    Subtotal: ${itemsPricebeforeDiscount}
+                  </div>
+                  <div className="text-2xl font-bold">
+                    Discount: -${(itemsPricebeforeDiscount - itemsPriceAfterDiscount).toFixed(2)}
+                  </div>
+                  <div className="text-2xl font-bold">
+                    Shipping: ${shippingPrice}
+                  </div>
+                  <div className="text-2xl font-bold">
+                    Taxes: ${taxPrice}
+                  </div>
+                  <div className="text-2xl font-bold">
+                    <span className="font-bold">Final Total:</span> ${totalPrice}
+                  </div>
 
                   <button
                     className="bg-pink-500 mt-4 py-2 px-4 rounded-full text-lg w-full"
@@ -149,6 +145,14 @@ const Cart = () => {
                     onClick={checkoutHandler}
                   >
                     Proceed To Checkout
+                  </button>
+
+                  {/* Reset Cart Button */}
+                  <button
+                    className="bg-red-500 mt-4 py-2 px-4 rounded-full text-lg w-full"
+                    onClick={resetCartHandler}
+                  >
+                    Reset Cart
                   </button>
                 </div>
               </div>

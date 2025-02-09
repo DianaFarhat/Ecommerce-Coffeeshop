@@ -90,13 +90,13 @@ const Order = () => {
           <p><span className="font-semibold">Email:</span> {order.user.email}</p>
           <p><span className="font-semibold">Address:</span> {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.postalCode}, {order.shippingAddress.country}</p>
           <p className={`mt-2 p-2 text-white rounded-lg ${order.isDelivered ? "bg-green-500" : "bg-red-500"}`}>
-            {order.isDelivered ? `Delivered on ${order.deliveredAt}` : "Not Delivered"}
+            {order.isDelivered ? `Delivered` : "Not Delivered"}
           </p>
 
           <h2 className="text-xl font-semibold mt-6 mb-4">Payment Details</h2>
           <p><span className="font-semibold">Payment Method:</span> {order.paymentMethod}</p>
           <p className={`mt-2 p-2 text-white rounded-lg ${order.isPaid ? "bg-green-500" : "bg-red-500"}`}>
-            {order.isPaid ? `Paid on ${order.paidAt}` : "Not Paid"}
+            {order.isPaid ? `Paid` : "Not Paid"}
           </p>
 
           <h2 className="text-xl font-semibold mt-6 mb-4">Order Items</h2>
@@ -141,6 +141,10 @@ const Order = () => {
     <p className="p-2 rounded-lg text-white text-center bg-yellow-500 mt-2">Active</p>
   )}
 
+  
+{(order.isPaid && order.isDelivered) && (
+    <p className="p-2 rounded-lg text-white text-center bg-green-500 mt-2">Completed</p>
+  )}
 {!order.isPaid && !order.isCanceled && (
   <button
     onClick={cancelOrderHandler}
