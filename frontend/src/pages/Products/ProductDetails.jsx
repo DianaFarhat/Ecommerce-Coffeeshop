@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useGetProductDetailsQuery, useCreateReviewMutation } from '../../redux/api/productApiSlice';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
+import Ratings from './Ratings';
 import { FaBox, FaClock, FaShoppingCart, FaStar, FaStore } from 'react-icons/fa';
 import moment from 'moment';
 
@@ -99,11 +100,7 @@ const ProductDetails = () => {
               </div>
 
               <div className="flex justify-between flex-wrap">
-               {/*  <Ratings
-                  value={product.rating}
-                  text={`${product.numReviews} reviews`}
-                />
- */}
+               <Ratings value={product.rating} text={`${product.numReviews} reviews`}/>
                 {product.countInStock > 0 && (
                   <div>
                     <select
