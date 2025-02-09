@@ -9,7 +9,8 @@ const categoryRouter=require("./routes/categoryRouter")
 const productRouter=require("./routes/productRouter")
 const orderRoutes= require('./routes/orderRouter')
 const dotenv=require("dotenv"); 
-       
+    
+const BundlesRoutes=require('./routes/bundleRouter')
 dotenv.config();
 
 // Run the database connection
@@ -32,8 +33,10 @@ app.options('*', cors());
 
 app.use("/api/users", userRouter)
 app.use("/api/category", categoryRouter)
-app.use("/api/products", productRouter)
+app.use("/api/products", productRouter) 
 app.use("/api/orders", orderRoutes)
+app.use("/api/bundles", BundlesRoutes)
+
 
 
 
