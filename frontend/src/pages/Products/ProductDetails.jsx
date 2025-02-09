@@ -52,7 +52,7 @@ const ProductDetails = () => {
         <Loader />
       ) : error ? (
         <Message variant="danger">
-          {error?.data?.message || error.message}
+          {error?.data|| error.message}
         </Message>
       ) : (
         <>
