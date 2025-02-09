@@ -87,6 +87,17 @@ exports.createOrder = async (req, res) => {
     const createdOrder = await order.save();
     
     console.log("✅ Order created successfully:", createdOrder);
+
+     // 🔻 Deduct Stock Quantity 🔻
+     for (const item of dbOrderItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.countInStock -= item.qty; // Deduct ordered quantity from stock
+        await product.save(); // Save the updated stock
+      }
+    }
+    console.log("✅ Product stock updated successfully");
+
     res.status(201).json(createdOrder);
   } catch (error) {
     console.log("🚨 Error creating order:", error.message);
@@ -220,29 +231,40 @@ exports.markOrderAsDelivered = async (req, res) => {
 };
 
 exports.cancelOrder = async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  try {
+    const order = await Order.findById(req.params.id);
 
-  const { userId } = req.query; // Get userId from query parameters
+    const { userId } = req.query; // Get userId from query parameters
 
-  if (!order) {
-    res.status(404);
-    throw new Error("Order not found");
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Ensure the user requesting the cancellation owns the order
+    if (order.user.toString() !== userId.toString()) {
+      return res.status(403).json({ error: "You are not authorized to cancel this order" });
+    }
+
+    // Prevent canceling a paid order
+    if (order.isPaid) {
+      return res.status(400).json({ error: "Cannot cancel a paid order" });
+    }
+
+    // Restore stock quantities
+    for (const item of order.orderItems) {
+      await Product.findByIdAndUpdate(
+        item.product,
+        { $inc: { countInStock: item.qty } }, // Increase stock by ordered quantity
+        { new: true }
+      );
+    }
+
+    // Delete the order after restoring stock
+    await Order.deleteOne({ _id: order._id });
+
+    res.json({ message: "Order has been successfully canceled, and stock has been restored." });
+  } catch (error) {
+    console.error("🚨 Error canceling order:", error.message);
+    res.status(500).json({ error: "Something went wrong" });
   }
-
-  // Ensure the user requesting the cancellation owns the order
-  if (order.user.toString() !== userId.toString()) {
-    res.status(403);
-    throw new Error("You are not authorized to cancel this order");
-  }
-
-  // Prevent canceling a paid order
-  if (order.isPaid) {
-    res.status(400);
-    throw new Error("Cannot cancel a paid order");
-  }
-
-  // Delete the order from the database
-  await Order.deleteOne({ _id: order._id });
-
-  res.json({ message: "Order has been successfully removed" });
 };

@@ -1,5 +1,7 @@
 const { asyncHandler } = require("../middlewares/asyncHandler.js");
 const Product =require("../models/productModel.js");
+const mongoose =require("mongoose")
+const Order =require("../models/orderModel.js");
 
 // const addProduct = asyncHandler(async (req, res) => {
 //   try {
@@ -208,3 +210,41 @@ exports.filterProducts = asyncHandler(async (req, res) => {
     }
   });
 
+
+  exports.getRecommendedProducts = async (req, res) => {
+    try {
+      const { userId } = req.query;
+  
+      if (userId && !mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+  
+      let recommendedProducts = [];
+  
+      if (userId) {
+        const userOrders = await Order.find({ user: userId }).populate("orderItems.product");
+  
+        if (userOrders.length > 0) {
+          const orderedProductIds = userOrders.flatMap(order =>
+            order.orderItems.map(item => item.product?._id?.toString())
+          );
+  
+          recommendedProducts = await Product.find({
+            _id: { $nin: orderedProductIds },
+            category: { $in: userOrders.flatMap(order =>
+              order.orderItems.map(item => item.product?.category)
+            )}
+          }).limit(5);
+        }
+      }
+  
+      if (recommendedProducts.length === 0) {
+        recommendedProducts = await Product.find().sort({ rating: -1 }).limit(5);
+      }
+  
+      res.json(recommendedProducts);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      res.status(500).json({ error: "Something went wrong" });
+    }
+  };

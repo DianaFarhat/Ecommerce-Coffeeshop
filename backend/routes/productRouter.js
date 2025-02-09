@@ -6,11 +6,12 @@ const {
   fetchAllProducts,
   addProductReview,
   fetchTopProducts,
-  fetchNewProducts,
+  fetchNewProducts,getRecommendedProducts,
   filterProducts,
 } =require("../controllers/productController.js");
 const {authenticate} = require("../middlewares/authMiddleware.js");
 const  {checkId} = require ("../middlewares/checkId.js");
+
 
 const express=require('express')
 const router = express.Router();
@@ -31,10 +32,14 @@ router.route("/:id/reviews").post(authenticate, checkId, addProductReview);
 router.get("/top", fetchTopProducts);
 router.get("/new", fetchNewProducts);
 
+router.get("/recommendations", getRecommendedProducts);
+
+
 router
   .route("/:id")
   .get(fetchProductById)
  
+
 
 //   router
 //   .route("/:id")
