@@ -5,7 +5,7 @@ import Loader from "../../components/Loader.js";
 import Message from "../../components/Message.js";
 import Product from "../Products/Product.jsx";
 import Header from "../../components/Header.js";
-
+import Recommendation from './Recommendation.jsx'
 
 
 
@@ -63,6 +63,8 @@ const Home = () => {
               </div>
             ))}
           </div>
+
+          <Recommendation/>
         </>
       )}
     </>

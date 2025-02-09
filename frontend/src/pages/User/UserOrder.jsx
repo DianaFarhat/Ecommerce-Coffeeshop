@@ -8,6 +8,7 @@ const UserOrder = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("active");
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -30,21 +31,45 @@ const UserOrder = () => {
     fetchOrders();
   }, []);
 
+  const filteredOrders = orders.filter((order) =>
+    activeTab === "active" ? !order.isDelivered : order.isDelivered
+  );
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-        🛒 My Orders
+      <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">
+        My Orders
       </h2>
+
+      {/* Tabs */}
+      <div className="flex justify-center mb-6">
+        <button
+          className={`px-4 py-2 font-semibold border-b-4 transition-all duration-200 ${
+            activeTab === "active" ? "border-blue-600 text-blue-600" : "border-gray-300 text-gray-500"
+          }`}
+          onClick={() => setActiveTab("active")}
+        >
+          Active Orders
+        </button>
+        <button
+          className={`px-4 py-2 ml-4 font-semibold border-b-4 transition-all duration-200 ${
+            activeTab === "completed" ? "border-blue-600 text-blue-600" : "border-gray-300 text-gray-500"
+          }`}
+          onClick={() => setActiveTab("completed")}
+        >
+          Completed Orders
+        </button>
+      </div>
 
       {loading ? (
         <Loader />
       ) : error ? (
         <Message variant="danger">{error}</Message>
-      ) : orders.length === 0 ? (
-        <Message variant="info">No orders found</Message>
+      ) : filteredOrders.length === 0 ? (
+        <Message variant="info">No {activeTab === "active" ? "active" : "completed"} orders found</Message>
       ) : (
         <div className="grid lg:grid-cols-2 gap-8">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <div
               key={order._id}
               className="bg-white shadow-lg rounded-lg p-6 transition-all duration-300 hover:shadow-xl hover:scale-105"
@@ -54,37 +79,33 @@ const UserOrder = () => {
                   Order ID: <span className="text-blue-600">{order._id}</span>
                 </h3>
                 <p className="text-sm text-gray-500">
-                  📅 {order.createdAt.substring(0, 10)}
+                  {order.createdAt.substring(0, 10)}
                 </p>
               </div>
 
               <div className="mt-3 flex justify-between items-center">
-                <p className="text-xl font-bold text-gray-800">
-                  💰 ${order.totalPrice}
-                </p>
+                <p className="text-xl font-bold text-gray-800">${order.totalPrice}</p>
                 <div className="flex items-center space-x-2">
                   <span
                     className={`px-3 py-1 text-white rounded-full text-sm ${
                       order.isPaid ? "bg-green-500" : "bg-red-500"
                     }`}
                   >
-                    {order.isPaid ? "✅ Paid" : "❌ Not Paid"}
+                    {order.isPaid ? "Paid" : "Not Paid"}
                   </span>
                   <span
                     className={`px-3 py-1 text-white rounded-full text-sm ${
                       order.isDelivered ? "bg-green-500" : "bg-red-500"
                     }`}
                   >
-                    {order.isDelivered ? "🚚 Delivered" : "📦 Not Delivered"}
+                    {order.isDelivered ? "Delivered" : "Not Delivered"}
                   </span>
                 </div>
               </div>
 
               {/* Order Items */}
               <div className="mt-5">
-                <h4 className="text-md font-semibold text-gray-700">
-                  🛍️ Order Items:
-                </h4>
+                <h4 className="text-md font-semibold text-gray-700">Order Items:</h4>
                 <div className="grid md:grid-cols-2 gap-4 mt-3">
                   {order.orderItems.map((item) => (
                     <div
@@ -99,9 +120,7 @@ const UserOrder = () => {
                       <div>
                         <p className="font-semibold text-gray-800">{item.name}</p>
                         <p className="text-gray-600">Qty: {item.qty}</p>
-                        <p className="text-gray-800 font-medium">
-                          💲{item.price}
-                        </p>
+                        <p className="text-gray-800 font-medium">${item.price}</p>
                       </div>
                     </div>
                   ))}
@@ -112,7 +131,7 @@ const UserOrder = () => {
               <div className="mt-6 flex justify-end">
                 <Link to={`/order/${order._id}`}>
                   <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-6 rounded-md transition-all duration-200">
-                    🔍 View Details
+                    View Details
                   </button>
                 </Link>
               </div>
