@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { updateCart } from "../../../Utils/cartUtils";
-
 // Function to get the user’s cart using the user ID
 const getUserCart = () => {
   const storedUser = JSON.parse(localStorage.getItem("userInfo"));
@@ -14,9 +13,22 @@ const getUserCart = () => {
 
 const initialState = getUserCart();
 
+// // Function to fetch product details from the backend
+// const fetchProductDetails = async (productId) => {
+//   try {
+//     const { data } = await axios.get(`http://localhost:3000/api/products/${productId}`);
+//     return data;
+//   } catch (error) {
+//     console.error("Error fetching product details:", error);
+//     return null;
+//   }
+// };
+
 const cartSlice = createSlice({
   name: "cart",
-  initialState,
+  initialState: {
+    cartItems: [],
+  },
   reducers: {
     addToCart: (state, action) => {
       const { user, rating, numReviews, reviews, ...item } = action.payload;
@@ -37,9 +49,24 @@ const cartSlice = createSlice({
         state.cartItems = [...state.cartItems, newItem];
       }
 
-      return updateCart(state);
+      updateCart(state);
+
     },
 
+    addBundleToCart: (state, action) => {
+      const { bundle, products } = action.payload;
+    
+      products.forEach((product) => {
+        // Ensure each product in the bundle is stored separately with qty = 1
+        state.cartItems = [
+          ...state.cartItems,
+          { ...product, qty: 1, bundleId: bundle._id, isBundle: true },
+        ];
+      });
+    
+      updateCart(state);
+    },
+    
     removeFromCart: (state, action) => {
       state.cartItems = state.cartItems.filter((x) => x._id !== action.payload);
       return updateCart(state);
@@ -86,7 +113,7 @@ const cartSlice = createSlice({
 
 export const {
   addToCart,
-  removeFromCart,
+  removeFromCart,addBundleToCart,
   savePaymentMethod,
   saveShippingAddress,
   clearCartItems,
