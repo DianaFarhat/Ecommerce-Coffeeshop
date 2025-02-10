@@ -21,7 +21,7 @@ const categories = [
 const chairs = [
   {
     name: "Atmosphera",
-    image: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcR0Z3403NWoM5JKFyIcQmpI4o47Ow5zMrjMd0PRTqClpuIWJJCpRrM00NkEUUHACEV07DHk6gTCW0BgnZMmZ5qzqd9H0GFkJs9ANmuI4W6Dfi2eG_CG44Cy7dqWqrTlC2XArDPwcVI6Eb-4&usqp=CAc.jpg",
+    image: "https://ouchcart.com/cdn/shop/products/Hendrix_Upholstered_Barrel_Chair.webp?v=1721373746&width=700",
     brand: "GS",
     quantity: 12,
     category: "67a0b7a9d7455824ec57d69f", // actual category id from MongoDB
@@ -508,8 +508,8 @@ async function seedProducts(products) {
 
 // Call the function to seed categories and products
 async function seed() {
-  await seedCategories();
-  await seedProducts(rugs);
+  await seedCategories(chairs);
+  //await seedProducts(rugs);
   
 }
 seed();
