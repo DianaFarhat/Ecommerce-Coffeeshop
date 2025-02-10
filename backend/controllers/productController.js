@@ -106,7 +106,13 @@ exports.fetchProducts = asyncHandler(async (req, res) => {
 
 exports.fetchProductById = asyncHandler(async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+
+    console.log(req.params.id)
+
+    const Pid = new mongoose.Types.ObjectId(req.params.id)
+    console.log(Pid)
+
+    const product = await Product.findById(Pid);
     if (product) {
       return res.json(product);
     } else {

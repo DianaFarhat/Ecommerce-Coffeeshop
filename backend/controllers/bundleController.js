@@ -9,4 +9,20 @@ const getBundles = async (req, res) => {
   }
 };
 
-module.exports = { getBundles };
+const getBundleProducts = async (req, res) => {
+  try {
+    const bundle = await Bundle.findById(req.params.id).populate("products", "_id");
+
+    if (!bundle) {
+      return res.status(404).json({ message: "Bundle not found" });
+    }
+
+    const productIds = bundle.products.map(product => product._id);
+    res.json({ productIds });
+  } catch (error) {
+    console.error("Error fetching bundle products:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+module.exports = { getBundles,getBundleProducts };
