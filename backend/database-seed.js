@@ -234,23 +234,7 @@ const sofas= [
     isBundle: false,
     bundleId: null 
   },
-  {
-    name: "Bohemian",
-    image: "https://www.couchhaus.com/cdn/shop/files/245683217_241127814707443_8451893831527751266_n_1_abb21f58-a352-4a91-ab71-18020e18d6a2.jpg?v=1693686462&width=1080",
-    brand: "Aoudo",
-    quantity: 12,
-    category: "67a0b7a9d7455824ec57d69b", 
-    description: "White bohemian style sitting room",
-    reviews: [
-      
-    ],
-    rating: 0,
-    numReviews: 0,
-    price: 427.80,
-    countInStock: 12,
-    isBundle: false,
-    bundleId: null 
-  },
+  
   {
     name: "Lazy Floor Sofa",
     image: "https://images.thdstatic.com/productImages/71abefb7-ef20-428d-ad60-c8532a08e119/svn/blue-magic-home-sofas-couches-ows-tsa100-31_600.jpg",
