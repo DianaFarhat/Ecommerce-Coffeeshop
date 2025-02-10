@@ -1,15 +1,13 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { useGetProductDetailsQuery, useCreateReviewMutation } from '../../redux/api/productApiSlice';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
 import Ratings from './Ratings';
 import { FaBox, FaClock, FaShoppingCart, FaStar, FaStore } from 'react-icons/fa';
 import moment from 'moment';
-
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
@@ -17,27 +15,28 @@ const ProductDetails = () => {
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
-  const { data: product, isLoading, refetch, error } = useGetProductDetailsQuery(productId);
+  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { userInfo } = useSelector((state) => state.auth);
-  const [createReview, { isLoading: loadingProductReview }] = useCreateReviewMutation();
 
-  // Add to cart handler
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:3000/api/products/${productId}`);
+        setProduct(data);
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [productId]);
+
   const addToCartHandler = () => {
     navigate(`/cart/${productId}?qty=${qty}`);
-  };
-
-  // Submit review handler
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      await createReview({ productId, rating, comment }).unwrap();
-      refetch();
-      toast.success('Review submitted successfully');
-      setRating(0);
-      setComment('');
-    } catch (err) {
-      toast.error(err?.data?.message || err.message);
-    }
   };
 
   return (
@@ -51,9 +50,7 @@ const ProductDetails = () => {
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">
-          {error?.data|| error.message}
-        </Message>
+        <Message variant="danger">{error}</Message>
       ) : (
         <>
           <div className="flex flex-wrap relative items-between mt-[2rem] ml-[10rem]">
@@ -70,7 +67,6 @@ const ProductDetails = () => {
               <p className="my-4 xl:w-[35rem] lg:w-[35rem] md:w-[30rem] text-[#B0B0B0]">
                 {product.description}
               </p>
-
               <p className="text-5xl my-4 font-extrabold">$ {product.price}</p>
 
               <div className="flex items-center justify-between w-[20rem]">
@@ -88,7 +84,7 @@ const ProductDetails = () => {
 
                 <div className="two">
                   <h1 className="flex items-center mb-6">
-                    <FaStar className="mr-2 text-white" /> Ratings: {rating}
+                    <FaStar className="mr-2 text-white" /> Ratings: {product.rating}
                   </h1>
                   <h1 className="flex items-center mb-6">
                     <FaShoppingCart className="mr-2 text-white" /> Quantity: {product.quantity}
@@ -100,7 +96,7 @@ const ProductDetails = () => {
               </div>
 
               <div className="flex justify-between flex-wrap">
-               <Ratings value={product.rating} text={`${product.numReviews} reviews`}/>
+                <Ratings value={product.rating} text={`${product.numReviews} reviews`} />
                 {product.countInStock > 0 && (
                   <div>
                     <select
@@ -127,19 +123,6 @@ const ProductDetails = () => {
                   Add To Cart
                 </button>
               </div>
-            </div>
-
-            <div className="mt-[5rem] container flex flex-wrap items-start justify-between ml-[10rem]">
-         {/*      <ProductTabs
-                loadingProductReview={loadingProductReview}
-                userInfo={userInfo}
-                submitHandler={submitHandler}
-                rating={rating}
-                setRating={setRating}
-                comment={comment}
-                setComment={setComment}
-                product={product}
-              /> */}
             </div>
           </div>
         </>
