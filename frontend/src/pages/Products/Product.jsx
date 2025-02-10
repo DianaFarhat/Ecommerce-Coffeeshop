@@ -1,17 +1,16 @@
 import { Link } from "react-router-dom";
 
-
-
-/*this code tried to fix image heights */
 const Product = ({ product }) => {
   return (
     <div className="w-[30rem] h-[40rem] ml-[2rem] p-3 relative flex flex-col items-center bg-white shadow-lg rounded-lg">
       <div className="relative w-full h-[25rem]">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover rounded"
-        />
+        <Link to={`/product/${product._id}`}> {/* Added Link around image */}
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover rounded"
+          />
+        </Link>
       </div>
 
       <div className="p-4 w-full text-center">
@@ -29,9 +28,6 @@ const Product = ({ product }) => {
 };
 
 export default Product;
-
-
-
 
 
 /* const Product = ({ product }) => {

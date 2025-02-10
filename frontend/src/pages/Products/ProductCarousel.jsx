@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";  // Import Link
 import axios from "axios";
 import Message from "../../components/Message";
 import Slider from "react-slick";
@@ -86,56 +87,57 @@ const ProductCarousel = () => {
             countInStock,
           }) => (
             <div key={_id}>
-              <img
-                src={image}
-                alt={name}
-                className="w-full rounded-lg object-cover h-[30rem]"
-              />
+              <Link to={`/product/${_id}`}>  {/* Link added here */}
+                <img
+                  src={image}
+                  alt={name}
+                  className="w-full rounded-lg object-cover h-[30rem]"
+                />
+              </Link>
 
               <div className="flex justify-between w-[20rem]">
                 <div className="one">
                   <h2>{name}</h2>
-                  <p>$ {price}</p> <br/> <br/>
-                  <p> {description}</p> <br/> <br/>
+                  <p>$ {price}</p> <br /> <br />
+                  <p> {description}</p> <br /> <br />
                 </div>
 
                 <div className="flex justify-between w-[20rem]">
                   <div className="one">
                     <h1 className="flex items-center mb-6 w-[8rem]">
-                      <FaStore className="mr-2 text-white"/> Brand: {" "}{brand}
+                      <FaStore className="mr-2 text-white" /> Brand: {brand}
                     </h1>
                     <h1 className="flex items-center mb-6 w-[8rem]">
-                      <FaStar className="mr-2 text-white"/> Added: {" "}{moment(createdAt).fromNow()}
+                      <FaStar className="mr-2 text-white" /> Added:{" "}
+                      {moment(createdAt).fromNow()}
                     </h1>
                     <h1 className="flex items-center mb-6 w-[8rem]">
-                      <FaStar className="mr-2 text-white"/> Reviews:{" "} {numReviews}
+                      <FaStar className="mr-2 text-white" /> Reviews: {numReviews}
                     </h1>
                   </div>
 
                   <div className="two">
                     <h1 className="flex items-center mb-6 w-[5rem]">
-                      <FaStar className="mr-2 text-white"/> Ratings: {" "}{Math.round(rating)}
+                      <FaStar className="mr-2 text-white" /> Ratings:{" "}
+                      {Math.round(rating)}
                     </h1>
                     <h1 className="flex items-center mb-6 w-[5rem]">
-                      <FaShoppingCart className="mr-2 text-white"/> {" "} Quantity:{quantity}
+                      <FaShoppingCart className="mr-2 text-white" /> Quantity:{" "}
+                      {quantity}
                     </h1>
                     <h1 className="flex items-center mb-6 w-[8rem]">
-                      <FaStar className="mr-2 text-white"/> Reviews:{" "} {numReviews}
+                      <FaStar className="mr-2 text-white" /> Reviews:{" "}
+                      {numReviews}
                     </h1>
                   </div>
                 </div>
               </div>
-
             </div>
-            
           )
         )}
       </Slider>
-
     </div>
   );
 };
-
-
 
 export default ProductCarousel;
