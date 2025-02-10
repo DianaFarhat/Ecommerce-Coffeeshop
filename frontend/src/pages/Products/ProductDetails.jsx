@@ -86,13 +86,18 @@ const ProductDetails = () => {
                   <h1 className="flex items-center mb-6">
                     <FaStar className="mr-2 text-white" /> Ratings: {product.rating}
                   </h1>
-                  <h1 className="flex items-center mb-6">
-                    <FaShoppingCart className="mr-2 text-white" /> Quantity: {product.quantity}
-                  </h1>
-                  <h1 className="flex items-center mb-6 w-[10rem]">
-                    <FaBox className="mr-2 text-white" /> In Stock: {product.countInStock}
-                  </h1>
+                  {product.countInStock < 1 ? (
+                    <h1 className="flex items-center mb-6 text-red-600">
+                      <FaBox className="mr-2 text-white" /> Out of Stock
+                    </h1>
+                  ) : (
+                    <h1 className="flex items-center mb-6 text-sky-400">
+                      <FaBox className="mr-2 text-white" /> In Stock
+                    </h1>
+                  )}
                 </div>
+
+
               </div>
 
               <div className="flex justify-between flex-wrap">
