@@ -31,27 +31,33 @@ const cartSlice = createSlice({
   },
   reducers: {
     addToCart: (state, action) => {
-      const { user, rating, numReviews, reviews, ...item } = action.payload;
-
+      const { user, rating, numReviews, reviews, bundleId, ...item } = action.payload;
+  
       const newItem = {
-        ...item,
-        isBundle: item.isBundle || false,
-        discount: item.discount || 0,
+          ...item,
+          bundleId: bundleId || null,  // Store the bundle ID if it exists
+          isBundle: item.isBundle || false,
+          discount: item.discount || 0,
       };
-
-      const existItem = state.cartItems.find((x) => x._id === item._id);
-
-      if (existItem) {
-        state.cartItems = state.cartItems.map((x) =>
-          x._id === existItem._id ? { ...x, qty: newItem.qty, discount: newItem.discount } : x
-        );
+  
+      // Find if an identical product (same ID & bundleId) exists in cart
+      const existItem = state.cartItems.find(
+          (x) => x._id === item._id && x.bundleId === (bundleId || null)
+      );
+  
+      if (existItem && !newItem.bundleId) {
+          // If the product is NOT part of a bundle, update its quantity
+          state.cartItems = state.cartItems.map((x) =>
+              x._id === existItem._id ? { ...x, qty: newItem.qty, discount: newItem.discount } : x
+          );
       } else {
-        state.cartItems = [...state.cartItems, newItem];
+          // If the product is part of a bundle (or does not exist), add separately
+          state.cartItems = [...state.cartItems, newItem];
       }
-
+  
       updateCart(state);
-
-    },
+  },
+  
 
     addBundleToCart: (state, action) => {
       const { bundle, products } = action.payload;

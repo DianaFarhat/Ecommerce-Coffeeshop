@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+import {addToCart} from "../../redux/features/cart/cartSlice"
+import { useDispatch, useSelector } from "react-redux";
 const Recommendation = () => {
   const [recommended, setRecommended] = useState([]);
   const [bundles, setBundles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [bundleProducts, setBundleProducts] = useState({}); // Store product IDs for each bundle
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,22 +40,30 @@ const Recommendation = () => {
   }, []);
 
   // Function to fetch product IDs of a bundle
-  const fetchBundleProducts = async (bundleId) => {
+  const handleAddBundleToCart = async (bundleId) => {
     try {
-      console.log(bundleId);
+        const response = await fetch(`http://localhost:3000/api/bundles/${bundleId}/products`);
 
-      
-      const { data } = await axios.get(`http://localhost:3000/api/bundles/${bundleId}/products`);
-      setBundleProducts((prev) => ({
-        ...prev,
-        [bundleId]: data.productIds, // Store product IDs for this bundle
-      }));
-      console.log(`Products in bundle`, data);
+        // Log raw response text before parsing
+        const textResponse = await response.text();
+        console.log("Raw Response Text:", textResponse);
+
+        // If it's not JSON, throw an error
+        try {
+            const products = JSON.parse(textResponse);
+            console.log("Bundle products:", products);
+            products.forEach((product) => {
+                dispatch(addToCart(product)); // Dispatch each product with bundleId
+            });
+        } catch (jsonError) {
+            throw new Error(`Failed to parse JSON. Received: ${textResponse}`);
+        }
 
     } catch (error) {
-      console.error(`Error fetching products for bundle ${bundleId}:`, error);
+        console.error("Error adding bundle products to cart:", error);
     }
-  };
+};
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,7 +107,7 @@ const Recommendation = () => {
                   
                   {/* Button to Fetch Product IDs */}
                   <button
-                    onClick={() => fetchBundleProducts(bundle._id)}
+                    onClick={() => handleAddBundleToCart(bundle._id)}
                     className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded-md"
                   >
                     Get Products
