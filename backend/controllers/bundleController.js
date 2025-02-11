@@ -11,13 +11,16 @@ const getBundles = async (req, res) => {
 
 const getBundleProducts = async (req, res) => {
   try {
-    const bundle = await Bundle.findById(req.params.id).populate("products", "_id");
+    const bundle = await Bundle.findById(req.params.id);
+    console.log(bundle)
 
     if (!bundle) {
       return res.status(404).json({ message: "Bundle not found" });
     }
 
     const productIds = bundle.products.map(product => product._id);
+    console.log(bundle)
+
     res.json({ productIds });
   } catch (error) {
     console.error("Error fetching bundle products:", error);

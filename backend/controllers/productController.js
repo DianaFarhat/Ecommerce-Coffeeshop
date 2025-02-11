@@ -104,26 +104,31 @@ exports.fetchProducts = asyncHandler(async (req, res) => {
   }
 });
 
-exports.fetchProductById = asyncHandler(async (req, res) => {
+
+
+exports.fetchProductById = async (req, res) => {
   try {
+    const productId = req.params.id;
+    console.log(productId)
 
-    console.log(req.params.id)
-
-    const Pid = new mongoose.Types.ObjectId(req.params.id)
-    console.log(Pid)
-
-    const product = await Product.findById(Pid);
-    if (product) {
-      return res.json(product);
-    } else {
-      res.status(404);
-      throw new Error("Product not found");
+    // Convert string ID to ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "Invalid product ID format" });
     }
+
+    const product = await Product.findById(productId);
+    console.log(product)
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    return res.json(product);
   } catch (error) {
-    console.error(error);
-    res.status(404).json({ error: "Product not found" });
+    console.error("Error fetching product:", error);
+    res.status(500).json({ error: "Server error while fetching product" });
   }
-});
+};
+
 exports.fetchAllProducts = asyncHandler(async (req, res) => {
   try {
     const products = await Product.find({})

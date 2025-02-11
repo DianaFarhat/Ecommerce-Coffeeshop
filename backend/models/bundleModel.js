@@ -4,6 +4,8 @@ const Schema = mongoose.Schema;
 // Bundle Schema
 const bundleSchema = new mongoose.Schema(
   {
+    
+    _id: { type: String, required: true }, // Explicitly setting _id as a String
     name: { type: String, required: true },
     image: { type: String, required: true },
     products: [

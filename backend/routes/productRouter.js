@@ -49,4 +49,18 @@ router
 
 router.post("/filter", filterProducts);
 
+// Fetch multiple products by their IDs
+router.post("/multiple", async (req, res) => {
+  try {
+    const { productIds } = req.body; // Receive product IDs as an array
+
+    // Fetch products matching the given IDs
+    const products = await Product.find({ _id: { $in: productIds } });
+
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch products", details: error.message });
+  }
+});
+
 module.exports = router; 
