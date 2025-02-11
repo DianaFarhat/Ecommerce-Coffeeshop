@@ -7,6 +7,7 @@ const Recommendation = () => {
   const [bundles, setBundles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bundleProducts, setBundleProducts] = useState({}); // Store product IDs for each bundle
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,6 +23,7 @@ const Recommendation = () => {
 
         // Fetch bundles
         const { data: bundlesData } = await axios.get("http://localhost:3000/api/bundles");
+        console.log(bundles);
 
         setRecommended(recommendedData);
         setBundles(bundlesData);
@@ -34,6 +36,24 @@ const Recommendation = () => {
 
     fetchData();
   }, []);
+
+  // Function to fetch product IDs of a bundle
+  const fetchBundleProducts = async (bundleId) => {
+    try {
+      console.log(bundleId);
+
+      
+      const { data } = await axios.get(`http://localhost:3000/api/bundles/${bundleId}/products`);
+      setBundleProducts((prev) => ({
+        ...prev,
+        [bundleId]: data.productIds, // Store product IDs for this bundle
+      }));
+      console.log(`Products in bundle`, data);
+
+    } catch (error) {
+      console.error(`Error fetching products for bundle ${bundleId}:`, error);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -74,6 +94,21 @@ const Recommendation = () => {
                   <Link to={`/bundle/${bundle._id}`} className="text-yellow-500">
                     View Bundle →
                   </Link>
+                  
+                  {/* Button to Fetch Product IDs */}
+                  <button
+                    onClick={() => fetchBundleProducts(bundle._id)}
+                    className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded-md"
+                  >
+                    Get Products
+                  </button>
+
+                  {/* Show Product IDs If Available */}
+                  {bundleProducts[bundle._id] && (
+                    <div className="mt-2 text-sm text-gray-700">
+                      <strong>Product IDs:</strong> {bundleProducts[bundle._id].join(", ")}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
