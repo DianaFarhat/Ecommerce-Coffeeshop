@@ -5,28 +5,34 @@ const Bundle =require('../models/bundleModel')
 router.get("/", getBundles);
 
 // Get product IDs from a specific bundle
+// Get product details along with bundle ID
 router.get("/:id/products", async (req, res) => {
     console.log("Received request for bundle ID:", req.params.id);
-    
+
     try {
-        const bundle = await Bundle.findOne({ _id: req.params.id });  
-      
+        const bundle = await Bundle.findById(req.params.id).populate("products");
+
         if (!bundle) {
             console.log("Bundle not found in database.");
             return res.status(404).json({ message: "Bundle not found" });
         }
 
-        // ✅ Fetch correct product ObjectIds
-        const productIds = bundle.products.map((product) => product._id);
+        // Add `bundleId` to each product
+        const productsWithBundleId = bundle.products.map((product) => ({
+            ...product.toObject(),
+            bundleId: req.params.id,  // Attach the bundle ID to each product
+            isBundle: true,  
+        }));
 
-        console.log("Bundle products:", productIds);
-        res.json({ productIds });
+        console.log("Bundle products with bundleId:", productsWithBundleId);
+        res.json(productsWithBundleId);
 
     } catch (error) {
         console.error("Error fetching bundle products:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
 
   
  

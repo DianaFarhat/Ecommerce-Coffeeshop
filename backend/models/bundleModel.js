@@ -8,12 +8,7 @@ const bundleSchema = new mongoose.Schema(
     _id: { type: String, required: true }, // Explicitly setting _id as a String
     name: { type: String, required: true },
     image: { type: String, required: true },
-    products: [
-      {
-        product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
-        quantity: { type: Number, required: true, default: 1 },
-      },
-    ],
+    products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }] , // Reference to Product model
     price: { type: Number, required: true, default: 0 },
     description: { type: String, required: true },
     category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
