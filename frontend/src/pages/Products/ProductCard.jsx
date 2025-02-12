@@ -8,7 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 const ProductCard = ({ p }) => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartItems); // Get cart state
-
+    const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+  const loggedInUserId = storedUser?.data?.user._id; // Extract user ID safely
   // Find if the product exists in the cart
   const existingItem = cartItems.find((item) => item._id === p._id);
   const currentQty = existingItem ? existingItem.qty : 0; // Get current qty in cart
@@ -73,21 +74,25 @@ const ProductCard = ({ p }) => {
           </Link>
 
           {/* Disable button if out of stock */}
-          <button
-            className={`p-2 rounded-full ${
-              isOutOfStock
-                ? "bg-gray-500 cursor-not-allowed"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-            onClick={() => addToCartHandler(p, 1)}
-            disabled={isOutOfStock}
-          >
-            {isOutOfStock ? (
-              <span className="text-white font-semibold text-sm">Out of Stock</span>
-            ) : (
-              <AiOutlineShoppingCart size={25} color="white" />
-            )}
-          </button>
+        {loggedInUserId ? (
+  <button
+    className={`p-2 rounded-full ${
+      isOutOfStock
+        ? "bg-gray-500 cursor-not-allowed"
+        : "bg-gray-700 hover:bg-gray-600"
+    }`}
+    onClick={() => addToCartHandler(p, 1)}
+    disabled={isOutOfStock}
+  >
+    {isOutOfStock ? (
+      <span className="text-white font-semibold text-sm">Out of Stock</span>
+    ) : (
+      <AiOutlineShoppingCart size={25} color="white" />
+    )}
+  </button>
+) : (
+  <></>
+)}
         </section>
       </div>
     </div>
