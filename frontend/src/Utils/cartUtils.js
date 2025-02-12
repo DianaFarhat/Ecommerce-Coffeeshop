@@ -6,7 +6,7 @@
         state.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
       );
     
-      state.itemsPricebeforeDiscount = addDecimals(
+      state.itemsPriceAfterDiscount = addDecimals(
         (state.cartItems || []).reduce((acc, item) => acc + (item?.price || 0) * (item?.qty || 0), 0)
       );
       
