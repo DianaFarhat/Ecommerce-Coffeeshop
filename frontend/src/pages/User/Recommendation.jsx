@@ -6,7 +6,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BundleContainer from './BundleContainer';
 
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 
@@ -51,19 +52,22 @@ const Recommendation = () => {
     fetchData();
   }, []);
 
-  const handleAddBundleToCart = async (bundleId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/bundles/${bundleId}/products`
-      );
-      const products = await response.json();
-      products.forEach((product) => {
-        dispatch(addToCart(product));
-      });
-    } catch (error) {
-      console.error("Error adding bundle products to cart:", error);
-    }
-  };
+const handleAddBundleToCart = async (bundleId) => {
+  try {
+    const response = await fetch(`http://localhost:3000/api/bundles/${bundleId}/products`);
+    const products = await response.json();
+
+    products.forEach((product) => {
+console.log("Adding to cart:", { ...product, qty: 1 });
+dispatch(addToCart({ ...product, qty: 1 }));
+    });
+
+    toast.success("Bundle added to cart successfully");
+  } catch (error) {
+    console.error("Error adding bundle products to cart:", error);
+    toast.error("Failed to add bundle to cart");
+  }
+};
 
   const scroll = (ref, direction) => {
     if (ref.current) {
