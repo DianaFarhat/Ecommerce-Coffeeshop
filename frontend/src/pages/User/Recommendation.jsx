@@ -16,21 +16,30 @@ const Recommendation = () => {
   const recommendedRef = useRef(null);
   const bundlesRef = useRef(null);
 
+
+  //Check if User is Logged In to Log his Recommended Section data
   useEffect(() => {
     const fetchData = async () => {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  
+      // If user isn't logged in, do nothing (skip the fetch)
+      if (!userInfo) {
+        setLoading(false);  // Stop loading if no user info found
+        return;
+      }
+  
       try {
-        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
         const userId = userInfo?.data?.user?._id;
-
+  
         const { data: recommendedData } = await axios.get(
           `http://localhost:3000/api/products/recommendations?userId=${userId}`,
           { withCredentials: true }
         );
-
+  
         const { data: bundlesData } = await axios.get(
           "http://localhost:3000/api/bundles"
         );
-
+  
         setRecommended(recommendedData);
         setBundles(bundlesData);
         setLoading(false);
@@ -39,9 +48,10 @@ const Recommendation = () => {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
+  
 
   const handleAddBundleToCart = async (bundleId) => {
     try {
@@ -136,21 +146,30 @@ const Recommendation = () => {
                 Recommended Bundles
               </h3>
               <div className="relative">
-                <button
-                  onClick={() => scroll(bundlesRef, "left")}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
-                >
-                  <ChevronLeft size={24} />
-                </button>
-                <div
-                  ref={bundlesRef}
-                  className="flex overflow-x-auto space-x-4 scrollbar-hide"
-                >
-                  {bundles.map((bundle) => (
-                    <div
-                      key={bundle._id}
-                      className="flex flex-col justify-between min-h-screen bg-white p-8 rounded-lg shadow-lg border border-yellow-400"
-                    >
+              {/* Left Scroll Button */}
+              <button
+                onClick={() => scroll(bundlesRef, "left")}
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
+              >
+                <ChevronLeft size={24} />
+              </button>
+
+              {/* Bundles Container */}
+              <div
+                ref={bundlesRef}
+                className="flex overflow-x-hidden" // Hide scrollbar but allow scrolling
+                style={{
+                  scrollSnapType: "x mandatory",  // Enforce snapping to each bundle
+                  scrollBehavior: "smooth", // Smooth scroll transition
+                }}
+              >
+                {bundles.map((bundle) => (
+                  <div
+                    key={bundle._id}
+                    className="flex-none w-full max-w-full px-2" // Bundle takes 100% width
+                    style={{ scrollSnapAlign: "start" }} // Align bundles properly when scrolling
+                  >
+                    <div className="flex flex-col justify-between min-h-screen bg-white p-8 rounded-lg shadow-lg border border-yellow-400">
                       <h3 className="text-lg font-semibold mt-2 text-yellow-600">
                         {bundle.name} (Bundle)
                       </h3>
@@ -195,15 +214,19 @@ const Recommendation = () => {
                         Add Bundle to Cart
                       </button>
                     </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => scroll(bundlesRef, "right")}
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
-                >
-                  <ChevronRight size={24} />
-                </button>
+                  </div>
+                ))}
               </div>
+
+              {/* Right Scroll Button */}
+              <button
+                onClick={() => scroll(bundlesRef, "right")}
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </div>
+
             </>
           )}
         </>
