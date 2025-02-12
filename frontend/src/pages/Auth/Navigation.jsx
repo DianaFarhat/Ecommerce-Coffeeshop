@@ -113,7 +113,7 @@ const Navigation = () => {
           <AiOutlineShopping className="mr-2 mt-[3rem]" size={26} />
           <span className="hidden nav-item-name mt-[3rem]">SHOP</span>{" "}
         </Link>
-
+ {userInfo ? (
         <Link to="/cart" className="flex relative">
           <div className="flex items-center transition-transform transform hover:translate-x-2">
             <AiOutlineShoppingCart className="mt-[3rem] mr-2" size={26} />
@@ -130,19 +130,22 @@ const Navigation = () => {
   )}
 </div>
 
-        </Link>
+        </Link>)
+    : (
+            <></>
+             )}
+     
 
         
-        <Link to="/user-orders" className="flex relative">
+        {userInfo ? ( <Link to="/user-orders" className="flex relative">
           <div className="flex items-center transition-transform transform hover:translate-x-2">
             <AiOutlineFileText className="mt-[3rem] mr-2" size={26} />
             <span className="hidden nav-item-name mt-[3rem]">My Orders</span>{" "}
           </div>
-
- 
-
-        </Link>
-
+    </Link>)
+    : (
+            <></>
+             )}
      
       </div>
 
