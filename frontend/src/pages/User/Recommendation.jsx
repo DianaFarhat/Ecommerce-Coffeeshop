@@ -1,9 +1,14 @@
-import { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
-import { addToCart } from "../../redux/features/cart/cartSlice";
-import { useDispatch } from "react-redux";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import axios from 'axios';
+import { addToCart } from '../../redux/features/cart/cartSlice';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import BundleContainer from './BundleContainer';
+
+
+
+
 
 const Recommendation = () => {
   const [recommended, setRecommended] = useState([]);
@@ -12,25 +17,19 @@ const Recommendation = () => {
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
 
-  // Refs for scrolling
   const recommendedRef = useRef(null);
-  const bundlesRef = useRef(null);
 
-
-  //Check if User is Logged In to Log his Recommended Section data
   useEffect(() => {
     const fetchData = async () => {
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   
-      // If user isn't logged in, do nothing (skip the fetch)
       if (!userInfo) {
-        setLoading(false);  // Stop loading if no user info found
+        setLoading(false);
         return;
       }
   
       try {
         const userId = userInfo?.data?.user?._id;
-  
         const { data: recommendedData } = await axios.get(
           `http://localhost:3000/api/products/recommendations?userId=${userId}`,
           { withCredentials: true }
@@ -51,7 +50,6 @@ const Recommendation = () => {
   
     fetchData();
   }, []);
-  
 
   const handleAddBundleToCart = async (bundleId) => {
     try {
@@ -93,7 +91,6 @@ const Recommendation = () => {
             <p>No recommendations available.</p>
           ) : (
             <>
-              {/* Recommended Items Section */}
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Recommended Items
               </h3>
@@ -141,92 +138,10 @@ const Recommendation = () => {
                 </button>
               </div>
 
-              {/* Recommended Bundles Section */}
               <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">
                 Recommended Bundles
               </h3>
-              <div className="relative">
-              {/* Left Scroll Button */}
-              <button
-                onClick={() => scroll(bundlesRef, "left")}
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
-              >
-                <ChevronLeft size={24} />
-              </button>
-
-              {/* Bundles Container */}
-              <div
-                ref={bundlesRef}
-                className="flex overflow-x-hidden" // Hide scrollbar but allow scrolling
-                style={{
-                  scrollSnapType: "x mandatory",  // Enforce snapping to each bundle
-                  scrollBehavior: "smooth", // Smooth scroll transition
-                }}
-              >
-                {bundles.map((bundle) => (
-                  <div
-                    key={bundle._id}
-                    className="flex-none w-full max-w-full px-2" // Bundle takes 100% width
-                    style={{ scrollSnapAlign: "start" }} // Align bundles properly when scrolling
-                  >
-                    <div className="flex flex-col justify-between min-h-screen bg-white p-8 rounded-lg shadow-lg border border-yellow-400">
-                      <h3 className="text-lg font-semibold mt-2 text-yellow-600">
-                        {bundle.name} (Bundle)
-                      </h3>
-                      <p className="text-gray-600">{bundle.description}</p>
-                      <div className="mt-4 grid grid-cols-3 gap-4">
-                        {bundle.products.map((product) => (
-                          <div key={product._id} className="text-center">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-full h-48 object-cover rounded-md"
-                            />
-                            <h4 className="text-sm font-semibold mt-2">
-                              {product.name}
-                            </h4>
-                            <p className="text-gray-600">
-                              <span
-                                className={`${
-                                  product.price === bundle.cheapestPrice
-                                    ? "line-through text-red-500"
-                                    : ""
-                                }`}
-                              >
-                                ${product.price}
-                              </span>
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-6 flex justify-between items-center">
-                        <p className="text-lg font-semibold text-gray-600">
-                          Original Price: ${bundle.originalPrice}
-                        </p>
-                        <p className="text-xl font-semibold text-yellow-600">
-                          Final Price: ${bundle.finalPrice}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleAddBundleToCart(bundle._id)}
-                        className="mt-6 bg-yellow-500 text-white px-4 py-2 rounded-md"
-                      >
-                        Add Bundle to Cart
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Right Scroll Button */}
-              <button
-                onClick={() => scroll(bundlesRef, "right")}
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </div>
-
+              <BundleContainer bundles={bundles} />
             </>
           )}
         </>
