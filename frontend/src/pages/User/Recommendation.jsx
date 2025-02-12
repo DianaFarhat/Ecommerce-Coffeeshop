@@ -149,29 +149,48 @@ const Recommendation = () => {
                   {bundles.map((bundle) => (
                     <div
                       key={bundle._id}
-                      className="bg-white p-4 rounded-lg shadow-lg min-w-[250px] max-w-[250px] border border-yellow-400"
+                      className="flex flex-col justify-between min-h-screen bg-white p-8 rounded-lg shadow-lg border border-yellow-400"
                     >
-                      <Link to={`/bundle/${bundle._id}`}>
-                        <img
-                          src={bundle.image}
-                          alt={bundle.name}
-                          className="w-full h-48 object-cover rounded-md"
-                        />
-                      </Link>
                       <h3 className="text-lg font-semibold mt-2 text-yellow-600">
                         {bundle.name} (Bundle)
                       </h3>
-                      <p className="text-gray-600">${bundle.price}</p>
-                      <Link
-                        to={`/bundle/${bundle._id}`}
-                        className="text-yellow-500"
-                      >
-                        View Bundle →
-                      </Link>
-
+                      <p className="text-gray-600">{bundle.description}</p>
+                      <div className="mt-4 grid grid-cols-3 gap-4">
+                        {bundle.products.map((product) => (
+                          <div key={product._id} className="text-center">
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-48 object-cover rounded-md"
+                            />
+                            <h4 className="text-sm font-semibold mt-2">
+                              {product.name}
+                            </h4>
+                            <p className="text-gray-600">
+                              <span
+                                className={`${
+                                  product.price === bundle.cheapestPrice
+                                    ? "line-through text-red-500"
+                                    : ""
+                                }`}
+                              >
+                                ${product.price}
+                              </span>
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-6 flex justify-between items-center">
+                        <p className="text-lg font-semibold text-gray-600">
+                          Original Price: ${bundle.originalPrice}
+                        </p>
+                        <p className="text-xl font-semibold text-yellow-600">
+                          Final Price: ${bundle.finalPrice}
+                        </p>
+                      </div>
                       <button
                         onClick={() => handleAddBundleToCart(bundle._id)}
-                        className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded-md"
+                        className="mt-6 bg-yellow-500 text-white px-4 py-2 rounded-md"
                       >
                         Add Bundle to Cart
                       </button>
