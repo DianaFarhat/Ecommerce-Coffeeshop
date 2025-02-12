@@ -1,17 +1,29 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { ChevronLeft, ChevronRight } from "react-feather"; // Or any icon you prefer
+import { addToCart } from '../../redux/features/cart/cartSlice';
+import { useDispatch } from 'react-redux';
 
 const BundleContainer = ({ bundles }) => {
   const [productsData, setProductsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const bundlesRef = useRef(null);
+    const dispatch = useDispatch();
 
   // Define the handleAddBundleToCart function
-  const handleAddBundleToCart = (bundleId) => {
-    // Add the logic to add the bundle to the cart
-    console.log(`Bundle with ID ${bundleId} added to cart.`);
+  const handleAddBundleToCart = async (bundleId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/bundles/${bundleId}/products`
+      );
+      const products = await response.json();
+      products.forEach((product) => {
+        dispatch(addToCart(product));
+      });
+    } catch (error) {
+      console.error("Error adding bundle products to cart:", error);
+    }
   };
 
   useEffect(() => {
