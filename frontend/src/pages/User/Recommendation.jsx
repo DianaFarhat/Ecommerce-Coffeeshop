@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import {addToCart} from "../../redux/features/cart/cartSlice"
-import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../../redux/features/cart/cartSlice";
+import { useDispatch } from "react-redux";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 const Recommendation = () => {
   const [recommended, setRecommended] = useState([]);
   const [bundles, setBundles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [bundleProducts, setBundleProducts] = useState({}); // Store product IDs for each bundle
   const dispatch = useDispatch();
+
+  // Refs for scrolling
+  const recommendedRef = useRef(null);
+  const bundlesRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,15 +22,14 @@ const Recommendation = () => {
         const userInfo = JSON.parse(localStorage.getItem("userInfo"));
         const userId = userInfo?.data?.user?._id;
 
-        // Fetch recommended products
         const { data: recommendedData } = await axios.get(
           `http://localhost:3000/api/products/recommendations?userId=${userId}`,
           { withCredentials: true }
         );
 
-        // Fetch bundles
-        const { data: bundlesData } = await axios.get("http://localhost:3000/api/bundles");
-        console.log(bundles);
+        const { data: bundlesData } = await axios.get(
+          "http://localhost:3000/api/bundles"
+        );
 
         setRecommended(recommendedData);
         setBundles(bundlesData);
@@ -39,35 +43,35 @@ const Recommendation = () => {
     fetchData();
   }, []);
 
-  // Function to fetch product IDs of a bundle
   const handleAddBundleToCart = async (bundleId) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/bundles/${bundleId}/products`);
-
-        // Log raw response text before parsing
-        const textResponse = await response.text();
-        console.log("Raw Response Text:", textResponse);
-
-        // If it's not JSON, throw an error
-        try {
-            const products = JSON.parse(textResponse);
-            console.log("Bundle products:", products);
-            products.forEach((product) => {
-                dispatch(addToCart(product)); // Dispatch each product with bundleId
-            });
-        } catch (jsonError) {
-            throw new Error(`Failed to parse JSON. Received: ${textResponse}`);
-        }
-
+      const response = await fetch(
+        `http://localhost:3000/api/bundles/${bundleId}/products`
+      );
+      const products = await response.json();
+      products.forEach((product) => {
+        dispatch(addToCart(product));
+      });
     } catch (error) {
-        console.error("Error adding bundle products to cart:", error);
+      console.error("Error adding bundle products to cart:", error);
     }
-};
+  };
 
+  const scroll = (ref, direction) => {
+    if (ref.current) {
+      const scrollAmount = 300;
+      ref.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Recommendations for You</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        Our Recommendations for You
+      </h2>
 
       {loading ? (
         <p>Loading...</p>
@@ -78,50 +82,110 @@ const Recommendation = () => {
           {recommended.length === 0 && bundles.length === 0 ? (
             <p>No recommendations available.</p>
           ) : (
-            <div className="grid md:grid-cols-3 gap-6">
-              {/* Display Recommended Products */}
-              {recommended.map((product) => (
-                <div key={product._id} className="bg-white p-4 rounded-lg shadow-lg">
-                  <Link to={`/product/${product._id}`}>
-                    <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded-md" />
-                  </Link>
-                  <h3 className="text-lg font-semibold mt-2">{product.name}</h3>
-                  <p className="text-gray-600">${product.price}</p>
-                  <Link to={`/product/${product._id}`} className="text-blue-500">
-                    View Details →
-                  </Link>
-                </div>
-              ))}
-
-              {/* Display Bundles */}
-              {bundles.map((bundle) => (
-                <div key={bundle._id} className="bg-white p-4 rounded-lg shadow-lg border border-yellow-400">
-                  <Link to={`/bundle/${bundle._id}`}>
-                    <img src={bundle.image} alt={bundle.name} className="w-full h-48 object-cover rounded-md" />
-                  </Link>
-                  <h3 className="text-lg font-semibold mt-2 text-yellow-600">{bundle.name} (Bundle)</h3>
-                  <p className="text-gray-600">${bundle.price}</p>
-                  <Link to={`/bundle/${bundle._id}`} className="text-yellow-500">
-                    View Bundle →
-                  </Link>
-                  
-                  {/* Button to Fetch Product IDs */}
-                  <button
-                    onClick={() => handleAddBundleToCart(bundle._id)}
-                    className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded-md"
-                  >
-                    Get Products
-                  </button>
-
-                  {/* Show Product IDs If Available */}
-                  {bundleProducts[bundle._id] && (
-                    <div className="mt-2 text-sm text-gray-700">
-                      <strong>Product IDs:</strong> {bundleProducts[bundle._id].join(", ")}
+            <>
+              {/* Recommended Items Section */}
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                Recommended Items
+              </h3>
+              <div className="relative">
+                <button
+                  onClick={() => scroll(recommendedRef, "left")}
+                  className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <div
+                  ref={recommendedRef}
+                  className="flex overflow-x-auto space-x-4 scrollbar-hide"
+                >
+                  {recommended.map((product) => (
+                    <div
+                      key={product._id}
+                      className="bg-white p-4 rounded-lg shadow-lg min-w-[250px] max-w-[250px]"
+                    >
+                      <Link to={`/product/${product._id}`}>
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-48 object-cover rounded-md"
+                        />
+                      </Link>
+                      <h3 className="text-lg font-semibold mt-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-600">${product.price}</p>
+                      <Link
+                        to={`/product/${product._id}`}
+                        className="text-blue-500"
+                      >
+                        View Details →
+                      </Link>
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
+                <button
+                  onClick={() => scroll(recommendedRef, "right")}
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </div>
+
+              {/* Recommended Bundles Section */}
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">
+                Recommended Bundles
+              </h3>
+              <div className="relative">
+                <button
+                  onClick={() => scroll(bundlesRef, "left")}
+                  className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <div
+                  ref={bundlesRef}
+                  className="flex overflow-x-auto space-x-4 scrollbar-hide"
+                >
+                  {bundles.map((bundle) => (
+                    <div
+                      key={bundle._id}
+                      className="bg-white p-4 rounded-lg shadow-lg min-w-[250px] max-w-[250px] border border-yellow-400"
+                    >
+                      <Link to={`/bundle/${bundle._id}`}>
+                        <img
+                          src={bundle.image}
+                          alt={bundle.name}
+                          className="w-full h-48 object-cover rounded-md"
+                        />
+                      </Link>
+                      <h3 className="text-lg font-semibold mt-2 text-yellow-600">
+                        {bundle.name} (Bundle)
+                      </h3>
+                      <p className="text-gray-600">${bundle.price}</p>
+                      <Link
+                        to={`/bundle/${bundle._id}`}
+                        className="text-yellow-500"
+                      >
+                        View Bundle →
+                      </Link>
+
+                      <button
+                        onClick={() => handleAddBundleToCart(bundle._id)}
+                        className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded-md"
+                      >
+                        Add Bundle to Cart
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => scroll(bundlesRef, "right")}
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full shadow-md"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </div>
+            </>
           )}
         </>
       )}
