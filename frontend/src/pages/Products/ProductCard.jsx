@@ -15,24 +15,20 @@ const ProductCard = ({ p }) => {
   const currentQty = existingItem ? existingItem.qty : 0; // Get current qty in cart
   const isOutOfStock = currentQty >= p.countInStock; // Disable button if stock is reached
 
-  const addToCartHandler = (product, qty) => {
-    if (!isOutOfStock) {
-      dispatch((dispatch, getState) => {
+const addToCartHandler = (product, qty) => {
+  if (!isOutOfStock) {
+    dispatch((dispatch, getState) => {
+      const existItem = cartItems.find((x) =>
+        String(x._id) === String(product._id) && x.isBundle === false
+      );
 
-const existItem = cartItems.find((x) =>
-  String(x._id) === String(product._id) && x.isBundle === false
-);        const updatedQty = existItem ? existItem.qty + qty : qty;
+      // Always pass just `qty` to Redux, let Redux handle updating
+      dispatch(addToCart({ ...product, qty:1 }));
+      toast.success("Item added successfully");
+    });
+  }
+};
 
-        if (updatedQty > product.countInStock) {
-          toast.error("Not enough stock available!");
-          return;
-        }
-
-        dispatch(addToCart({ ...product, qty: updatedQty }));
-        toast.success("Item added successfully");
-      });
-    }
-  };
 
   return (
     <div className="w-64 min-h-[350px] flex flex-col justify-between bg-[#1A1A1A] rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
