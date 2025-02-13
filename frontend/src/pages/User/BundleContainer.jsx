@@ -12,19 +12,34 @@ const BundleContainer = ({ bundles }) => {
     const dispatch = useDispatch();
 
   // Define the handleAddBundleToCart function
-  const handleAddBundleToCart = async (bundleId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/bundles/${bundleId}/products`
-      );
-      const products = await response.json();
-      products.forEach((product) => {
-        dispatch(addToCart(product));
-      });
-    } catch (error) {
-      console.error("Error adding bundle products to cart:", error);
-    }
-  };
+const handleAddBundleToCart = async (bundleId) => {
+  try {
+    const response = await fetch(`http://localhost:3000/api/bundles/${bundleId}/products`);
+    const products = await response.json();
+
+    if (products.length === 0) return; // No products in bundle
+
+    // Find the cheapest product
+    const cheapestProduct = products.reduce((min, product) => 
+      product.price < min.price ? product : min, products[0]
+    );
+
+    // Add all products to cart, applying a discount on the cheapest product
+    products.forEach((product) => {
+      const productWithDiscount = {
+        ...product,
+        discount: product._id === cheapestProduct._id ? 70 : 0, // Apply discount to cheapest
+        isBundle: true, // Mark as a bundle
+      };
+
+      dispatch(addToCart(productWithDiscount));
+    });
+
+  } catch (error) {
+    console.error("Error adding bundle products to cart:", error);
+  }
+};
+
 
   useEffect(() => {
     const fetchProductDetails = async (productId) => {

@@ -112,7 +112,7 @@ const Cart = () => {
                     Items ({userCartItems.reduce((acc, item) => acc + item.qty, 0)})
                   </h2>
 
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold">Total after discount
                     ${" "}
                     {userCartItems
                       .reduce(
@@ -126,18 +126,35 @@ const Cart = () => {
                   <div className="text-2xl font-bold">
                     Subtotal: ${itemsPricebeforeDiscount}
                   </div>
-                  <div className="text-2xl font-bold">
-                    Discount: -${(itemsPricebeforeDiscount - itemsPriceAfterDiscount).toFixed(2)}
-                  </div>
+              <div className="text-2xl font-bold">
+  Discount: -$
+  {(
+    parseFloat(itemsPricebeforeDiscount) - 
+    userCartItems.reduce(
+      (acc, item) => acc + item.qty * ((item.price * (100 - item.discount)) / 100),
+      0
+    )
+  ).toFixed(2)}
+</div>
+
                   <div className="text-2xl font-bold">
                     Shipping: ${shippingPrice}
                   </div>
                   <div className="text-2xl font-bold">
                     Taxes: ${taxPrice}
                   </div>
-                  <div className="text-2xl font-bold">
-                    <span className="font-bold">Final Total:</span> ${totalPrice}
-                  </div>
+              <div className="text-2xl font-bold">
+  <span className="font-bold">Final Total:</span> $
+  {(
+    Number(taxPrice) +
+    Number(shippingPrice) +
+    userCartItems.reduce(
+      (acc, item) => acc + item.qty * ((item.price * (100 - item.discount)) / 100),
+      0
+    )
+  ).toFixed(2)}
+</div>
+
 
                   <button
                     className="bg-pink-500 mt-4 py-2 px-4 rounded-full text-lg w-full"

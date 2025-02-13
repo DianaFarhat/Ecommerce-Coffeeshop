@@ -18,8 +18,11 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
- addToCart: (state, action) => {
+addToCart: (state, action) => {
   const { user, rating, numReviews, reviews, qty = 1, ...item } = action.payload; // Extract qty
+
+  console.log("Current cart before adding:", JSON.stringify(state.cartItems, null, 2));
+  console.log("New item to add:", item);
 
   const newItem = {
     ...item,
@@ -28,29 +31,46 @@ const cartSlice = createSlice({
     discount: item.discount || 0,
   };
 
+  console.log("Processed newItem:", newItem);
+
   if (!newItem.isBundle) {
-    // If it's NOT a bundle, check if the item already exists in cart
-    const existItem = state.cartItems.find((x) => x._id === item._id && x.isBundle==false);
+    console.log("Looking for existing item with _id:", newItem._id);
+
+    // Find if the item exists in the cart as a non-bundle
+const existItem = state.cartItems.find((x) =>
+  String(x._id) === String(newItem._id) && x.isBundle === false
+);
+
+
+    console.log("Existing item found:", existItem);
+ 
+
 
     if (existItem) {
-      // If item exists, update its quantity
-     state.cartItems = state.cartItems.map((x) =>
-        x._id === existItem._id && !x.isBundle
-          ? { ...x, qty: existItem.qty + 1 } 
+      console.log(`Updating quantity of existing item ${existItem._id}`);
+      state.cartItems = state.cartItems.map((x) =>
+        x._id === existItem._id && x.isBundle === false
+          ? { ...x, qty: existItem.qty + qty }
           : x
       );
     } else {
-      // If item does NOT exist, add as a new entry
+      console.log(`Adding new item ${newItem._id} as an individual product`);
       state.cartItems = [...state.cartItems, newItem];
     }
   } else {
-    // If it IS a bundle, always add as a separate entry
+    console.log(`Adding bundle ${newItem._id}`);
     state.cartItems = [...state.cartItems, newItem];
+
+    // Add each product inside the bundle separately
+    item.products?.forEach((product) => {
+      console.log(`Adding bundled product ${product._id}`);
+      state.cartItems.push({ ...product, qty: 1, isBundle: true });
+    });
   }
 
+  console.log("Cart after adding:", JSON.stringify(state.cartItems, null, 2));
   return updateCart(state);
 },
-
 
     removeFromCart: (state, action) => {
       state.cartItems = state.cartItems.filter((x) => x._id !== action.payload);
