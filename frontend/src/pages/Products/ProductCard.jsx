@@ -18,8 +18,10 @@ const ProductCard = ({ p }) => {
   const addToCartHandler = (product, qty) => {
     if (!isOutOfStock) {
       dispatch((dispatch, getState) => {
-        const existingItem = getState().cart.cartItems.find((x) => x._id === product._id);
-        const updatedQty = existingItem ? existingItem.qty + qty : qty;
+
+const existItem = cartItems.find((x) =>
+  String(x._id) === String(product._id) && x.isBundle === false
+);        const updatedQty = existItem ? existItem.qty + qty : qty;
 
         if (updatedQty > product.countInStock) {
           toast.error("Not enough stock available!");
