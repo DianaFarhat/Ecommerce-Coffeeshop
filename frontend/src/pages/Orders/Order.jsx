@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {useNavigate } from "react-router-dom";
+import Swal from "sweetalert2"; // Import SweetAlert2
+
 
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -19,29 +21,49 @@ const Order = () => {
 
   const navigate = useNavigate();
 
+const cancelOrderHandler = async () => {
+  const userInfo = JSON.parse(localStorage.getItem("userInfo")); // Parse stored string to object
+  const userId = userInfo?.data?.user?._id; // Extract user _id
 
-  const cancelOrderHandler = async () => {
-
-    const userInfo = JSON.parse(localStorage.getItem("userInfo")); // Parse stored string to object
-    const userId = userInfo?.data?.user?._id; // Extract user _id
-
-    if (window.confirm("Are you sure you want to cancel this order?")) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "Do you want to cancel this order? This action cannot be undone.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, cancel it!",
+    cancelButtonText: "No, keep it",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/api/orders/${orderId}/cancel?userId=${userId}`,
-        {
+        await axios.delete(`http://localhost:3000/api/orders/${orderId}/cancel?userId=${userId}`, {
           withCredentials: true,
         });
-        toast.success("Order has been canceled successfully.");
-  
+
+        Swal.fire({
+          title: "Order Canceled",
+          text: "Your order has been successfully canceled.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+        });
+
         setTimeout(() => {
           navigate("/shop");
-        }, 2000); // 2seconds
-        
+        }, 2000); // 2-second delay before redirecting
       } catch (error) {
-        toast.error(error.response?.data?.message || error.message);
+        Swal.fire({
+          title: "Error",
+          text: error.response?.data?.message || error.message,
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
       }
     }
-  };
+  });
+};
+
+
   
 
   useEffect(() => {
