@@ -72,10 +72,37 @@ const existItem = state.cartItems.find((x) =>
   return updateCart(state);
 },
 
-    removeFromCart: (state, action) => {
-      state.cartItems = state.cartItems.filter((x) => x._id !== action.payload);
-      return updateCart(state);
-    },
+
+setQuantity: (state, action) => {
+  const { _id, qty } = action.payload; // Extract product ID and new quantity
+
+  console.log("Setting quantity for item:", _id, "New quantity:", qty);
+
+  const existItem = state.cartItems.find(
+    (x) => String(x._id) === String(_id) && x.isBundle === false
+  );
+
+  console.log("Existing item found:", existItem);
+
+  if (existItem) {
+    state.cartItems = state.cartItems.map((x) =>
+      x._id === existItem._id && x.isBundle === false
+        ? { ...x, qty: qty } // Directly update quantity
+        : x
+    );
+  }
+
+  console.log("Cart after updating quantity:", JSON.stringify(state.cartItems, null, 2));
+  return updateCart(state);
+},
+
+removeFromCart: (state, action) => {
+  state.cartItems = state.cartItems.filter((x) => {
+    // Only remove the item if it's not part of a bundle OR if it's explicitly removed as part of a bundle
+    return !(x._id === action.payload.id && x.bundleId === action.payload.bundleId);
+  });
+  return updateCart(state);
+},
 
     saveShippingAddress: (state, action) => {
       state.shippingAddress = action.payload;
@@ -122,7 +149,7 @@ export const {
   savePaymentMethod,
   saveShippingAddress,
   clearCartItems,
-  resetCart,refreshCart
+  resetCart,refreshCart,setQuantity
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

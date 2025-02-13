@@ -7,9 +7,8 @@
       );
     
       state.itemsPriceAfterDiscount = addDecimals(
-        (state.cartItems || []).reduce((acc, item) => acc + (item?.price || 0) * (item?.qty || 0), 0)
+        state.cartItems.reduce((acc, item) => acc + (item.price * (1 - item.discount / 100)) * item.qty, 0)
       );
-      
     
       state.shippingPrice = addDecimals(state.itemsPriceAfterDiscount > 100 ? 0 : 10);
       state.taxPrice = addDecimals(Number((0.15 * state.itemsPriceAfterDiscount).toFixed(2)));

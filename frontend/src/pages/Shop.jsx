@@ -12,7 +12,8 @@ const Shop = () => {
   const { categories, products, checked, radio } = useSelector((state) => state.shop);
 
   const categoriesQuery = useFetchCategoriesQuery();
-  const [priceFilter, setPriceFilter] = useState("");
+  const [priceFilter, setPriceFilter] = useState([0, 1000]); // Price range filter (min, max)
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchFilteredProducts = async () => {
     try {
@@ -20,25 +21,31 @@ const Shop = () => {
         checked,
         radio,
       });
-  
+
       console.log("Fetched Products:", response.data);
-  
+
       const filteredProducts = response.data.filter((product) => {
-        return (
-          product.price.toString().includes(priceFilter) ||
-          product.price === parseInt(priceFilter, 10)
-        );
+        // Filter based on search query and price range
+        const matchesSearchQuery =
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          categories.some((cat) => product.category === cat._id);
+
+        const matchesPriceRange =
+          product.price >= priceFilter[0] && product.price <= priceFilter[1];
+
+        return matchesSearchQuery && matchesPriceRange;
       });
-  
+
       dispatch(setProducts(filteredProducts));
     } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
-  
+
   useEffect(() => {
     fetchFilteredProducts();
-  }, [checked, radio, priceFilter]); // Refetch when filters change
+  }, [checked, radio, priceFilter, searchQuery]); // Refetch when filters or search query change
 
   const handleBrandClick = (brand) => {
     const productsByBrand = products?.filter((product) => product.brand === brand);
@@ -55,9 +62,18 @@ const Shop = () => {
   return (
     <div className="container mx-auto">
       <div className="flex md:flex-row">
-        <div className="bg-[#151515] p-3 mt-2 mb-2">
-          <h2 className="h4 text-center py-2 bg-black rounded-full mb-2">Filter by Categories</h2>
-          <div className="p-5 w-[15rem]">
+        <div className="bg-[#151515] p-3 mt-2 mb-2 w-[20rem]">
+          <div className="p-5">
+          <input
+  type="text"
+  placeholder="Search by name, category, or description"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="w-full px-3 py-2 placeholder-gray-400 text-pink-600 border rounded-lg focus:outline-none focus:ring focus:border-pink-300"
+/>
+          </div>
+
+          <div className="p-5">
             {categories?.map((c) => (
               <div key={c._id} className="mb-2">
                 <div className="flex items-center mr-4">
@@ -72,7 +88,6 @@ const Shop = () => {
             ))}
           </div>
 
-          <h2 className="h4 text-center py-2 bg-black rounded-full mb-2">Filter by Brands</h2>
           <div className="p-5">
             {uniqueBrands?.map((brand) => (
               <div className="flex items-center mr-4 mb-5" key={brand}>
@@ -87,25 +102,49 @@ const Shop = () => {
             ))}
           </div>
 
-          <h2 className="h4 text-center py-2 bg-black rounded-full mb-2">Filter by Price</h2>
-          <div className="p-5 w-[15rem]">
+          <div className="p-5">
+            <div className="flex items-center justify-between">
             <input
-              type="text"
-              placeholder="Enter Price"
-              value={priceFilter}
-              onChange={(e) => setPriceFilter(e.target.value)}
-              className="w-full px-3 py-2 placeholder-gray-400 border rounded-lg focus:outline-none focus:ring focus:border-pink-300"
-            />
+  type="number"
+  value={priceFilter[0]}
+  onChange={(e) => {
+    const newValue = parseInt(e.target.value);
+    if (newValue >= 0) {
+      setPriceFilter([newValue, priceFilter[1]]);
+    }
+  }}
+  className="w-24 px-3 py-2 placeholder-gray-400 text-pink-600 border rounded-lg focus:outline-none focus:ring focus:border-pink-300"
+  placeholder="Min"
+  min="0"
+/>
+              <span className="text-white">to</span>
+              <input
+  type="number"
+  value={priceFilter[1]}
+  onChange={(e) => {
+    const newValue = parseInt(e.target.value);
+    if (newValue >= 0) {
+      setPriceFilter([priceFilter[0], newValue]);
+    }
+  }}
+  className="w-24 px-3 py-2 placeholder-gray-400 text-pink-600 border rounded-lg focus:outline-none focus:ring focus:border-pink-300"
+  placeholder="Max"
+  min="0"
+/>
+            </div>
           </div>
 
           <div className="p-5 pt-0">
-            <button className="w-full border my-4" onClick={() => window.location.reload()}>
-              Reset
-            </button>
-          </div>
+  <button
+    className="w-full border border-pink-600 text-pink-600 bg-transparent hover:bg-pink-600 hover:text-white my-4 py-2 rounded-lg focus:outline-none focus:ring focus:ring-pink-300"
+    onClick={() => window.location.reload()}
+  >
+    Reset
+  </button>
+</div>
         </div>
 
-        <div className="p-3">
+        <div className="p-3 flex-1">
           <h2 className="h4 text-center mb-2">{products?.length} Products</h2>
           <div className="flex flex-wrap">
             {products.length === 0 ? (
