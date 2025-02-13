@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+﻿import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrash } from "react-icons/fa";
 import { addToCart, setQuantity, removeFromCart, resetCart } from "../../redux/features/cart/cartSlice";
@@ -73,10 +73,50 @@ const removeBundleFromCartHandler = (bundleId) => {
   });
 };
 
+const checkoutHandler = async () => {
+  try {
+    console.log("🛒 Sending cartItems to backend:", userCartItems);
 
-  const checkoutHandler = () => {
+    const response = await fetch("http://localhost:3000/api/products/check-stock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cartItems: userCartItems.map(item => ({ id: item._id, qty: item.qty })) }),
+    });
+
+    const data = await response.json();
+    console.log("📦 Response from backend:", data);
+
+    if (data.error) {
+      console.error("❌ Stock check error:", data.error);
+      return;
+    }
+
+    // ✅ Correct way to check out-of-stock items
+    if (data.outOfStockItems && data.outOfStockItems.length > 0) {
+      Swal.fire({
+        title: "Stock Unavailable",
+        text: `The following items are out of stock: ${data.outOfStockItems.map(item => item.name).join(", ")}`,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+
+      // Remove out-of-stock items from cart
+      data.outOfStockItems.forEach((item) => {
+        dispatch(removeFromCart({ id: item.id }));
+      });
+
+      return; // Stop checkout process
+    }
+
+    // ✅ Proceed to checkout only if all items are in stock
     navigate("/login?redirect=/shipping");
-  };
+
+  } catch (error) {
+    console.error("❗ Error checking stock:", error);
+    Swal.fire("Error", "Unable to verify stock. Try again.", "error");
+  }
+};
+
 
   const resetCartHandler = () => {
     dispatch(resetCart());
