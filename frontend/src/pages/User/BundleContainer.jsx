@@ -19,67 +19,88 @@ const BundleContainer = ({ bundles }) => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const navigate = useNavigate();
 
+  // Fetch product details
+  const fetchProductDetails = async (productId) => {
+    try {
+      const { data } = await axios.get(`http://localhost:3000/api/products/${productId}`);
+      return data;
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+      return null;
+    }
+  };
+
+  // Fetch all product details for bundles
+  useEffect(() => {
+    const fetchAllProductDetails = async () => {
+      setIsLoading(true);
+      try {
+        const productDetailsPromises = bundles.flatMap((bundle) =>
+          bundle.products.map((productId) => fetchProductDetails(productId))
+        );
+
+        const productDetails = await Promise.all(productDetailsPromises);
+        setProductsData(productDetails.filter(product => product)); // Filter out nulls
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllProductDetails();
+  }, [bundles]);
+
   // Check if the bundle is in the cart already
   const isBundleInCart = (bundleId) => {
     return cartItems.some(item => item.isBundle && item.bundleId === bundleId);
   };
 
+  // Check bundle stock status
   const checkBundleStock = (bundle) => {
-    console.log('Checking bundle:', bundle);  // Log the entire bundle to see what data is being passed
-  
-    // If the bundle or its products are missing, consider it out of stock
+    // If the bundle has no products, it's out of stock
     if (!bundle?.products || bundle.products.length === 0) {
-      console.log('Bundle is missing products or products array is empty');  // Log when this condition is true
       return true;
     }
-  
+
     // Check if any product in the bundle is out of stock
-    const isOutOfStock = bundle.products.some((product) => {
-      console.log('Checking product:', product);  // Log each product in the bundle to check its data
-  
+    const isOutOfStock = bundle.products.some((productId) => {
+      const productData = productsData.find((item) => String(item._id) === String(productId));
+
+      // If no product data is found, assume out of stock
+      if (!productData) return true;
+
+      // If product is out of stock directly
+      if (productData.countInStock <= 0) return true;
+
       // Find the product in the cart
-      const existingCartItem = cartItems.find((item) => item._id === product?._id);
-      console.log('Existing cart item:', existingCartItem);  // Log the product found in the cart
-  
-      // Calculate the total quantity of this product in the cart
+      const existingCartItem = cartItems.find((item) => String(item._id) === String(productId));
+
+      // Get the quantity in the cart for this product
       const cartQuantity = existingCartItem ? existingCartItem.qty : 0;
-      console.log('Cart quantity for this product:', cartQuantity);  // Log the cart quantity
-  
-      // Check if the product is out of stock or the cart quantity exceeds or equals the stock
-      const isProductOutOfStock = product?.countInStock === 0 || cartQuantity >= product?.countInStock;
-  
-      // If the product is out of stock or the cart quantity exceeds or equals the stock, return true
-      if (isProductOutOfStock) {
-        console.log('Product is out of stock or cart quantity exceeds or equals stock, bundle should be out of stock');
-        return true;
-      }
-  
-      return false;  // If no products are out of stock, return false
+
+      // If the cart already has the maximum stock available
+      if (cartQuantity >= productData.countInStock) return true;
+
+      return false;
     });
-  
-    console.log('Is bundle out of stock:', isOutOfStock);  // Log the final stock status of the bundle
+
     return isOutOfStock;
   };
-  
+
+  // Update stock status for all bundles
   useEffect(() => {
     const updateStockStatus = () => {
       const stockStatus = {};
       bundles.forEach((bundle) => {
-        console.log('Processing bundle:', bundle);  // Log each bundle being processed
         stockStatus[bundle._id] = checkBundleStock(bundle);
       });
-      console.log('Stock status for all bundles:', stockStatus);  // Log the final stock status of all bundles
       setBundleStockStatus(stockStatus);
     };
-  
-    updateStockStatus();
-  }, [bundles, cartItems]); // Re-run when bundles or cartItems change
-  
-  // Initialize userInfo state from localStorage
-  const [userInfo, setUserInfo] = useState(() => JSON.parse(localStorage.getItem("userInfo")));
 
-  // State for storing the user ID
-  const [loggedInUserId, setLoggedInUserId] = useState(() => userInfo?.data?.user?._id || null);
+    updateStockStatus();
+  }, [bundles, cartItems, productsData]);
+
 
   // Define the handleAddBundleToCart function
   const handleAddBundleToCart = async (bundleId) => {
@@ -108,35 +129,7 @@ const BundleContainer = ({ bundles }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchProductDetails = async (productId) => {
-      try {
-        const { data } = await axios.get(`http://localhost:3000/api/products/${productId}`);
-        return data;
-      } catch (err) {
-        setError(err.response?.data?.message || err.message);
-      }
-    };
-
-    const fetchAllProductDetails = async () => {
-      setIsLoading(true);
-      try {
-        const productDetailsPromises = bundles.flatMap((bundle) =>
-          bundle.products.map((productId) => fetchProductDetails(productId))
-        );
-
-        const productDetails = await Promise.all(productDetailsPromises);
-        setProductsData(productDetails);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAllProductDetails();
-  }, [bundles]);
-
+ 
   const scroll = (direction) => {
     const scrollAmount = direction === "left" ? -200 : 200;
     bundlesRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
