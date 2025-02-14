@@ -1,59 +1,69 @@
-import { useState, useEffect } from "react";
+import { useState ,useEffect} from "react";
 import {
   AiOutlineHome,
   AiOutlineShopping,
   AiOutlineLogin,
   AiOutlineUserAdd,
   AiOutlineShoppingCart,
-  AiOutlineFileText
+  AiOutlineFileText,
 } from "react-icons/ai";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/userApiSlice";
-import { logout } from "../../redux/features/auth/authSlice";
-import axios from 'axios';
+import axios from "axios";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import "./Navigation.css";  // Make sure to update the CSS for top nav bar
-const Navigation = () => {
+import Swal from "sweetalert2";
+import "./Navigation.css"; // Make sure to update the CSS for top nav bar
 
-  const dispatch = useDispatch();
+const Navigation = () => {
   const navigate = useNavigate();
   const storedUser = JSON.parse(localStorage.getItem("userInfo"));
   const loggedInUserId = storedUser?.data?.user._id;
   const { userInfo } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
-
+    const [isLoggedIn, setIsLoggedIn] = useState(!!loggedInUserId); // Local state for login status
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+    setIsLoggedIn(!!storedUser?.data?.user._id); // Sync with localStorage
+  }, []);
+
   const [logoutApiCall] = useLogoutMutation();
 
   const logoutHandler = async () => {
     try {
-        const response = await axios.post(
-            "http://localhost:3000/api/users/logout",
-            {},
-            { withCredentials: true }
-        );
+      const response = await axios.post(
+        "http://localhost:3000/api/users/logout",
+        {},
+        { withCredentials: true }
+      );
 
-        if (response.status === 200) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("userInfo");
-            localStorage.removeItem("expirationTime");
-            alert("Logged out successfully!");
-            navigate('/login');
-        } else {
-            alert("Logout failed. Please try again.");
-        }
+setIsLoggedIn(false);
+      if (response.status === 200) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userInfo");
+        localStorage.removeItem("expirationTime");
+
+        Swal.fire({
+          icon: "success",
+          title: "Logged out successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => navigate("/login"));
+      } else {
+        Swal.fire("Error", "Logout failed. Please try again.", "error");
+      }
     } catch (err) {
-        alert("Logout failed: An unexpected error occurred.");
-        console.error("Logout error:", err);
+      Swal.fire("Error", "An unexpected error occurred.", "error");
+      console.error("Logout error:", err);
     }
-};
+  };
 
   return (
     <div className="top-nav-bar bg-black text-white flex justify-between items-center px-4 py-2 fixed w-full z-50">
@@ -110,7 +120,7 @@ const Navigation = () => {
                 />
               </svg>
             </button>
-            {dropdownOpen && (
+            {loggedInUserId && dropdownOpen && (
               <ul className="absolute right-0 mt-2 bg-white text-black rounded shadow-lg w-40">
                 <li>
                   <button
@@ -124,16 +134,18 @@ const Navigation = () => {
             )}
           </>
         ) : (
-          <div className="flex space-x-6">
-            <Link to="/login" className="flex items-center hover:text-gray-400">
-              <AiOutlineLogin size={26} />
-              <span className="ml-2">LOGIN</span>
-            </Link>
-            <Link to="/register" className="flex items-center hover:text-gray-400">
-              <AiOutlineUserAdd size={26} />
-              <span className="ml-2">REGISTER</span>
-            </Link>
-          </div>
+          !loggedInUserId && (
+            <div className="flex space-x-6">
+              <Link to="/login" className="flex items-center hover:text-gray-400">
+                <AiOutlineLogin size={26} />
+                <span className="ml-2">LOGIN</span>
+              </Link>
+              <Link to="/register" className="flex items-center hover:text-gray-400">
+                <AiOutlineUserAdd size={26} />
+                <span className="ml-2">REGISTER</span>
+              </Link>
+            </div>
+          )
         )}
       </div>
     </div>

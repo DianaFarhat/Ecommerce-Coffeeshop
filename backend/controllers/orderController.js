@@ -115,10 +115,14 @@ exports.getAllOrders = async (req, res) => {
 };
 
 exports.getUserOrders = async (req, res) => {
+    console.log("hit")
   try {
     const { userId } = req.query; // Get userId from query parameters
+    console.log(userId)
+    useridObject= new mongoose.Types.ObjectId(userId)
+    const orders = await Order.find({ user: useridObject });
+    console.log(orders)
 
-    const orders = await Order.find({ userId });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });
