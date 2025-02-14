@@ -19,6 +19,9 @@ const UserOrder = () => {
           `http://localhost:3000/api/orders/mine?userId=${userId}`,
           { withCredentials: true }
         );
+            console.log(userId)
+            console.log(data)
+
 
         setOrders(data);
         setLoading(false);
