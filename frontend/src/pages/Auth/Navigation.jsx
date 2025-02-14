@@ -32,7 +32,7 @@ const Navigation = () => {
 
   const [logoutApiCall] = useLogoutMutation();
 
-  const logoutHandler = async () => {
+/*   const logoutHandler = async () => {
     try {
         const response = await axios.post(
             "http://localhost:3000/api/users/logout",
@@ -54,8 +54,49 @@ const Navigation = () => {
         console.error("Logout error:", err);
     }
 };
+ */
+    const logoutHandler = async () => {
+      try {
+          // Call the logout API
+          const response = await axios.post(
+              "http://localhost:3000/api/users/logout",
+              {},
+              { withCredentials: true }
+          );
 
-  return (
+          // Check if the logout was successful
+          if (response.status === 200) {
+              // Remove the token from localStorage (if used)
+              localStorage.removeItem("token");
+              localStorage.removeItem("userInfo");
+              localStorage.removeItem("expirationTime");
+            
+              // Show success message
+              alert("Logged out successfully!");
+              // Redirect to the homepage
+              navigate('/login')
+                    } else {
+              alert("Logout failed. Please try again.");
+          }
+      } catch (err) {
+          // Handle specific errors
+          if (err.response) {
+              // Server responded with an error status code (e.g., 401, 500)
+              alert(`Logout failed: ${err.response.data.message || "Server error"}`);
+          } else if (err.request) {
+              // Request was made but no response was received
+              alert("Logout failed: No response from the server.");
+          } else {
+              // Something else went wrong
+              alert("Logout failed: An unexpected error occurred.");
+          }
+          console.error("Logout error:", err);
+      }
+    };
+
+
+
+return (
     <div className="top-nav-bar bg-black text-white flex justify-between items-center px-4 py-2 fixed w-full z-50">
       <div className="flex space-x-6">
         <Link to="/" className="flex items-center hover:text-gray-400">
