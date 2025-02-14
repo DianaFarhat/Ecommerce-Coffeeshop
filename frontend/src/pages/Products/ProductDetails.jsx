@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
 import Ratings from './Ratings';
 import { FaBox, FaClock, FaShoppingCart, FaStar, FaStore } from 'react-icons/fa';
 import moment from 'moment';
+import { addToCart } from "../../redux/features/cart/cartSlice";
 
 const ProductDetails = () => {
-  const { id: productId } = useParams();
+  /* const { id: productId } = useParams();
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
@@ -18,7 +19,20 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  
+  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.cartItems); // Get cart state
+
+  // Get User Info from Local Storage
+  const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+  const loggedInUserId = storedUser?.data?.user._id; // Extract user ID safely
+
+  // Check if the product is already in the cart
+  const existingItem = cartItems.find((item) => item._id === product?._id);
+  const currentQty = existingItem ? existingItem.qty : 0;
+  const isOutOfStock = currentQty >= product?.countInStock;
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -35,9 +49,61 @@ const ProductDetails = () => {
     fetchProductDetails();
   }, [productId]);
 
+  const addToCartHandler = (product, qty) => {
+    if (!isOutOfStock) {
+      dispatch((dispatch, getState) => {
+        const existItem = cartItems.find((x) =>
+          String(x._id) === String(product._id) && x.isBundle === false
+        );
+
+        // Always pass just `qty` to Redux, let Redux handle updating
+        dispatch(addToCart({ ...product, qty:1 }));
+        toast.success("Item added successfully");
+      });
+    }
+  }; */
+
+  const { id: productId } = useParams();
+  const navigate = useNavigate();
+  const [qty, setQty] = useState(1);
+  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.cartItems);
+
+  // Check if the product is already in the cart
+  const existingItem = cartItems.find((item) => item._id === product?._id);
+  const currentQty = existingItem ? existingItem.qty : 0;
+  const isOutOfStock = currentQty >= product?.countInStock;
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:3000/api/products/${productId}`);
+        setProduct(data);
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [productId]);
+
+  // Fix: Pass the correct parameters and clean up the function
   const addToCartHandler = () => {
-    navigate(`/cart/${productId}?qty=${qty}`);
+    if (!isOutOfStock && product) {
+      dispatch(addToCart({ ...product, qty }));
+      toast.success('Item added successfully');
+    } else {
+      toast.error('Out of stock');
+    }
   };
+
 
   return (
     <>
@@ -120,13 +186,25 @@ const ProductDetails = () => {
               </div>
 
               <div className="btn-container">
-                <button
-                  onClick={addToCartHandler}
-                  disabled={product.countInStock === 0}
-                  className="bg-pink-600 text-white py-2 px-4 rounded-lg mt-4 md:mt-0"
-                >
-                  Add To Cart
-                </button>
+                    {userInfo ? (
+                        <button
+                          onClick={addToCartHandler}
+                          disabled={isOutOfStock || product?.countInStock === 0}
+                          className={`bg-pink-600 text-white py-2 px-4 rounded-lg mt-4 ${
+                            isOutOfStock || product?.countInStock === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          {isOutOfStock ? 'Out of Stock' : 'Add To Cart'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => navigate('/login')}
+                          className="bg-gray-500 text-white py-2 px-4 rounded-lg mt-4"
+                        >
+                          Login to Add to Cart
+                        </button>
+                    )}
+
               </div>
             </div>
           </div>
