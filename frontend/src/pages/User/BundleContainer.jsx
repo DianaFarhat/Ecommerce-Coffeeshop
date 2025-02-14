@@ -167,7 +167,10 @@ const BundleContainer = ({ bundles }) => {
             {bundle.name} (Bundle)
           </h3>
           <p className="text-gray-600">{bundle.description}</p>
-
+          {/* Out of Stock Status */}
+          {bundleStockStatus[bundle._id] && (
+            <div className="text-red-600 font-bold mt-2">Out of stock</div>
+          )}
           {/* Loading State */}
           {isLoading ? (
             <div className="flex justify-center items-center mt-4">
