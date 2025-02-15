@@ -69,7 +69,7 @@ const Login = () => {
 
             // Add a delay (e.g., 2 seconds) before redirecting
             setTimeout(() => {
-                navigate("/cart");
+                navigate("/");
             }, 2000); // 2000 ms = 2 seconds
         } catch (err) {
             const errorMessage = err.response?.data?.message || "Error occurred during login";

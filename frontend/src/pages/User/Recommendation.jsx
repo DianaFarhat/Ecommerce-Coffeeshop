@@ -1,15 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import axios from 'axios';
-import { addToCart } from '../../redux/features/cart/cartSlice';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import BundleContainer from './BundleContainer';
+import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import axios from "axios";
+import { addToCart } from "../../redux/features/cart/cartSlice";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import BundleContainer from "./BundleContainer";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-
 
 const Recommendation = () => {
   const [recommended, setRecommended] = useState([]);
@@ -17,57 +15,55 @@ const Recommendation = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
-
   const recommendedRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  
-      if (!userInfo) {
-        setLoading(false);
-        return;
-      }
-  
       try {
-        const userId = userInfo?.data?.user?._id;
-        const { data: recommendedData } = await axios.get(
-          `http://localhost:3000/api/products/recommendations?userId=${userId}`,
-          { withCredentials: true }
-        );
-  
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+        // Fetch bundles (always shown)
         const { data: bundlesData } = await axios.get(
           "http://localhost:3000/api/bundles"
         );
-  
-        setRecommended(recommendedData);
         setBundles(bundlesData);
-        setLoading(false);
+
+        if (userInfo) {
+          // Fetch recommended products for logged-in users
+          const userId = userInfo?.data?.user?._id;
+          const { data: recommendedData } = await axios.get(
+            `http://localhost:3000/api/products/recommendations?userId=${userId}`,
+            { withCredentials: true }
+          );
+          setRecommended(recommendedData);
+        }
       } catch (err) {
         setError(err.response?.data?.error || err.message);
+      } finally {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 
-const handleAddBundleToCart = async (bundleId) => {
-  try {
-    const response = await fetch(`http://localhost:3000/api/bundles/${bundleId}/products`);
-    const products = await response.json();
+  const handleAddBundleToCart = async (bundleId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/bundles/${bundleId}/products`
+      );
+      const products = await response.json();
 
-    products.forEach((product) => {
-console.log("Adding to cart:", { ...product, qty: 1 });
-dispatch(addToCart({ ...product, qty: 1 }));
-    });
+      products.forEach((product) => {
+        dispatch(addToCart({ ...product, qty: 1 }));
+      });
 
-    toast.success("Bundle added to cart successfully");
-  } catch (error) {
-    console.error("Error adding bundle products to cart:", error);
-    toast.error("Failed to add bundle to cart");
-  }
-};
+      toast.success("Bundle added to cart successfully");
+    } catch (error) {
+      console.error("Error adding bundle products to cart:", error);
+      toast.error("Failed to add bundle to cart");
+    }
+  };
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -91,11 +87,18 @@ dispatch(addToCart({ ...product, qty: 1 }));
         <p className="text-red-500">{error}</p>
       ) : (
         <>
-          {recommended.length === 0 && bundles.length === 0 ? (
-            <p>No recommendations available.</p>
-          ) : (
+          {bundles.length > 0 && (
             <>
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                Recommended Bundles
+              </h3>
+              <BundleContainer bundles={bundles} />
+            </>
+          )}
+
+          {recommended.length > 0 && (
+            <>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">
                 Recommended Items
               </h3>
               <div className="relative">
@@ -125,10 +128,7 @@ dispatch(addToCart({ ...product, qty: 1 }));
                         {product.name}
                       </h3>
                       <p className="text-gray-600">${product.price}</p>
-                      <Link
-                        to={`/product/${product._id}`}
-                        className="text-blue-500"
-                      >
+                      <Link to={`/product/${product._id}`} className="text-blue-500">
                         View Details →
                       </Link>
                     </div>
@@ -141,11 +141,6 @@ dispatch(addToCart({ ...product, qty: 1 }));
                   <ChevronRight size={24} />
                 </button>
               </div>
-
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">
-                Recommended Bundles
-              </h3>
-              <BundleContainer bundles={bundles} />
             </>
           )}
         </>
