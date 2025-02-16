@@ -74,6 +74,7 @@ const Login = () => {
         } catch (err) {
             const errorMessage = err.response?.data?.message || "Error occurred during login";
             toast.error(errorMessage);
+                     setLoading(false); // Reset button state on failure
         }
     };
 

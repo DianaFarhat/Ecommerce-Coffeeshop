@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from "react-router-dom";
-import { toast,ToastContainer } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom"; // ✅ Import useNavigate
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { auth, provider } from "../../Firebase"; 
+import { signInWithPopup } from "firebase/auth";
 
 const SignUp = () => {
+  const navigate = useNavigate(); // ✅ Initialize useNavigate
+  const [loading, setLoading] = useState(false); // Track login status
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,16 +20,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("Submitting:", {
-      firstName,
-      lastName,
-      email,
-      username,
-      password,
-      passwordConfirm,
-      role,
-    });
+      setLoading(true); // Set button to "Logging in..."
 
     try {
       const response = await axios.post('http://localhost:3000/api/users/signup', {
@@ -38,10 +32,41 @@ const SignUp = () => {
         passwordConfirm,
         role,
       });
-      toast.success("User successfully registered"); 
 
+      toast.success("User successfully registered"); 
+      setTimeout(() => navigate("/Login"), 2000); // ✅ Redirect to home after success
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error occurred during signup');
+         setLoading(false); // Reset button state on failure
+
+    }
+  };
+
+  const signInWithGoogle = async (e) => {
+       e.preventDefault();
+      setLoading(true); // Set button to "Logging in..."
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const { displayName, email, photoURL, uid } = result.user;
+
+      const res = await axios.post("http://localhost:3000/api/users/google-login", {
+        googleId: uid,
+        name: displayName,
+        email: email,
+        photo: photoURL,
+      });
+
+      toast.success("User successfully registered");
+      setTimeout(() => navigate("/Login"), 2000); // ✅ Redirect to home after success
+    } catch (error) {
+ if (error.response?.status === 400) {
+      toast.error("User already registered");
+       setLoading(false); // Reset button state on failure
+          }     
+
+     else {
+      toast.error("Google Sign-In Error");
+    }      setLoading(false); // Reset button state on failure
     }
   };
 
@@ -128,6 +153,14 @@ const SignUp = () => {
                 <option value="admin">Admin</option>
               </select>
             </div>
+
+            <button
+              className="w-full bg-red-500 text-white py-3 rounded-md hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+              onClick={signInWithGoogle}
+              type="button"
+            >
+              Sign in with Google
+            </button>
 
             <button
               type="submit"
