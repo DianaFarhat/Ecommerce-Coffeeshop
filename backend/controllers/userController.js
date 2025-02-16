@@ -182,3 +182,41 @@
 
             console.log(err)
         }}
+
+
+        exports.googleLogin = async (req, res) => {
+  
+        try {
+   
+        const { googleId, name, email, photo } = req.body;
+        console.log(email)
+  
+        let user = await User.findOne({ email });
+
+
+       if (user) {
+      // User already exists, send an error response
+      return res.status(400).json({ message: "User already registered" });
+    }
+
+        if (!user) {
+      // Create new user if not exists
+    
+      user = new User({
+        firstName: name.split(" ")[0],
+        lastName: name.split(" ")[1] || "",
+        email,
+        username: email.split("@")[0], // Generate a username
+        password: "google-auth", // No password needed, but required in schema
+        passwordConfirm: "google-auth",
+      });
+      await user.save();
+    }
+
+    // Send token & response
+   
+    createSendToken(user, 200, res);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
