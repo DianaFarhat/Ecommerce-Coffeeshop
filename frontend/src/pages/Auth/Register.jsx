@@ -154,13 +154,17 @@ const SignUp = () => {
               </select>
             </div>
 
-            <button
-              className="w-full bg-red-500 text-white py-3 rounded-md hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-              onClick={signInWithGoogle}
-              type="button"
-            >
-              Sign in with Google
-            </button>
+                      <button
+  className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm font-medium shadow-sm"
+  onClick={signInWithGoogle}
+  type="button"
+>
+<img 
+  src="https://developers.google.com/identity/images/g-logo.png" 
+  alt="Google logo" 
+  className="w-5 h-5"
+/>  Sign in with Google
+</button>
 
             <button
               type="submit"

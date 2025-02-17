@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import axios from "axios";
 import { setCredentials } from "../../redux/features/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,7 +6,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { refreshCart } from "../../redux/features/cart/cartSlice"; // Import the resetCart action
-
+import { auth, provider } from "../../Firebase"; 
+import { signInWithPopup } from "firebase/auth";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,6 +23,57 @@ const Login = () => {
     const { search } = useLocation();
     const sp = new URLSearchParams(search);
     const redirect = sp.get("redirect") || "/login";
+
+    const signInWithGoogle = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const uid = user.uid; // ✅ Get UID properly
+    const email = user.email; // ✅ Get Email
+
+    console.log("Google User UID:", uid);
+    console.log("Google User Email:", email);
+
+    // Send both UID & Email to backend
+    const res = await axios.post("http://localhost:3000/api/users/loginWithGoogle", {
+      googleId: uid,
+      email: email,
+    },{ withCredentials: true });
+
+   
+            setIsLoggedIn(true);
+
+            const { token} = res.data;
+
+            // Store token and user info in localStorage
+            localStorage.setItem("token", token);
+            localStorage.setItem("userInfo", JSON.stringify(user)); // Store user info as JSON
+
+            // Dispatch the user info to the Redux store
+            dispatch(setCredentials(res.data)); // Dispatch full response data
+            console.log(res.data); // This will show the exact structure of the response from the server
+
+            // Dispatch the resetCart action to update the cart state
+            dispatch(refreshCart());
+
+            setIsLoggedIn(true);
+            toast.success("User successfully Logged in!");
+
+            // Add a delay (e.g., 2 seconds) before redirecting
+            setTimeout(() => {
+                navigate("/");
+            }, 2000); // 2000 ms = 2 seconds
+  } catch (error) {
+    if (error.response?.status === 400) {
+      toast.error("User not found or incorrect credentials.");
+    } else {
+      toast.error("Google Sign-In Error");
+    }
+    setLoading(false);
+  }
+};
 
     // Check login status when the component mounts
     useEffect(() => {
@@ -103,6 +155,22 @@ const Login = () => {
                         required
                     />
                 </div>
+
+              <button
+  className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm font-medium shadow-sm"
+  onClick={signInWithGoogle}
+  type="button"
+>
+<img 
+  src="https://developers.google.com/identity/images/g-logo.png" 
+  alt="Google logo" 
+  className="w-5 h-5"
+/>
+
+  Sign in with Google
+</button>
+
+
                 <button
                     type="submit"
                     className="bg-blue-500 text-white px-4 py-2 rounded w-full"
