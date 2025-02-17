@@ -46,7 +46,7 @@ const SignUp = () => {
        e.preventDefault();
       setLoading(true); // Set button to "Logging in..."
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider.setCustomParameters({ prompt: "select_account" }));
       const { displayName, email, photoURL, uid } = result.user;
 
       const res = await axios.post("http://localhost:3000/api/users/google-login", {

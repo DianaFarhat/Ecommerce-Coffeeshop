@@ -24,56 +24,60 @@ const Login = () => {
     const sp = new URLSearchParams(search);
     const redirect = sp.get("redirect") || "/login";
 
-    const signInWithGoogle = async (e) => {
+const signInWithGoogle = async (e) => {
   e.preventDefault();
-  setLoading(true);
+
   try {
-    const result = await signInWithPopup(auth, provider);
+    // Open Google Sign-In popup (doesn't set loading yet)
+    const result = await signInWithPopup(auth, provider.setCustomParameters({ prompt: "select_account" }));
+
+    if (!result?.user) {
+      throw new Error("No user returned from Google Sign-In");
+    }
+
+    // ✅ Now we know an account was chosen, so set loading to true
+    setLoading(true);
+
     const user = result.user;
-    const uid = user.uid; // ✅ Get UID properly
-    const email = user.email; // ✅ Get Email
+    const uid = user.uid;
+    const email = user.email;
 
     console.log("Google User UID:", uid);
     console.log("Google User Email:", email);
 
-    // Send both UID & Email to backend
+    // Send UID & Email to backend
     const res = await axios.post("http://localhost:3000/api/users/loginWithGoogle", {
       googleId: uid,
       email: email,
-    },{ withCredentials: true });
+    }, { withCredentials: true });
 
-   
-            setIsLoggedIn(true);
+    const { token } = res.data;
 
-            const { token} = res.data;
+    localStorage.setItem("token", token);
+    localStorage.setItem("userInfo", JSON.stringify(user));
 
-            // Store token and user info in localStorage
-            localStorage.setItem("token", token);
-            localStorage.setItem("userInfo", JSON.stringify(user)); // Store user info as JSON
+    dispatch(setCredentials(res.data));
+    dispatch(refreshCart());
 
-            // Dispatch the user info to the Redux store
-            dispatch(setCredentials(res.data)); // Dispatch full response data
-            console.log(res.data); // This will show the exact structure of the response from the server
+    setIsLoggedIn(true);
+    toast.success("User successfully Logged in!");
 
-            // Dispatch the resetCart action to update the cart state
-            dispatch(refreshCart());
-
-            setIsLoggedIn(true);
-            toast.success("User successfully Logged in!");
-
-            // Add a delay (e.g., 2 seconds) before redirecting
-            setTimeout(() => {
-                navigate("/");
-            }, 2000); // 2000 ms = 2 seconds
+    setTimeout(() => {
+      navigate("/");
+    }, 2000);
   } catch (error) {
-    if (error.response?.status === 400) {
+    if (error.code === "auth/popup-closed-by-user") {
+      toast.info("Google Sign-In popup was closed. Please try again.");
+    } else if (error.response?.status === 400) {
       toast.error("User not found or incorrect credentials.");
     } else {
       toast.error("Google Sign-In Error");
     }
-    setLoading(false);
+  } finally {
+    setLoading(false); // ✅ Ensures loading state is always reset
   }
 };
+
 
     // Check login status when the component mounts
     useEffect(() => {
