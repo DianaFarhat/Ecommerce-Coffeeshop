@@ -21,21 +21,28 @@
             return token;
         };
 
-        const createSendToken=(user,statusCode,res)=>{
-            const token =signToken(user._id,res);    
+     const createSendToken = (user, statusCode, res) => {
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
 
-        // ✅ Log the cookie to verify if it's being set
-        console.log("Cookies Set:", res.getHeaders()["set-cookie"]);
-                res.status(statusCode).json({status:"Success",
-                token,
-                data:{
-                    user, 
+  res.cookie("jwt", token, {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    httpOnly: true,
+    sameSite: "Strict",
+  });
 
-                }
-            })
+  res.status(statusCode).json({
+    status: "success",
+    token, // ✅ Sending token in response
+    data: { user },
+  });
+
+  return token; // ✅ Return the generated token
+};
 
 
-        }
+        
         exports.signup = async (req, res) => {
             const { firstName, lastName, email, username, password, passwordConfirm, role } = req.body;
         
@@ -220,3 +227,37 @@
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.loginWithGoogle = async (req, res) => {
+  try {
+    const { googleId, email } = req.body;
+    console.log("Google UID:", googleId);
+    console.log("Google Email:", email);
+
+    const user = await User.findOne({ googleId, email });
+
+    if (!user) {
+      return res.status(401).json({ message: "User not registered or email does not match." });
+    }
+
+    // ✅ Generate token
+    const token = createSendToken(user, 200, res); // This already sends a response!
+
+    console.log("Generated Token:", token); // Debugging
+
+    // ✅ Only return if token is valid (Avoids second response)
+    if (!token) {
+      return res.status(500).json({ message: "Token generation failed" });
+    }
+
+  } catch (err) {
+    console.error("Google login error:", err);
+
+    // ✅ Ensure error response is sent only ONCE
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Google login failed" });
+    }
+  }
+};
+
+
