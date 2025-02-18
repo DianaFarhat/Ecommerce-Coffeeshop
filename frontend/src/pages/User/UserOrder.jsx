@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Message from "../../components/Message";
 import Loader from "../../components/Loader";
-import { addToCart } from '../../redux/features/cart/cartSlice';
+import { addToCart, resetCart } from '../../redux/features/cart/cartSlice';
 import { useDispatch } from 'react-redux';
 
 
@@ -44,14 +44,45 @@ const UserOrder = () => {
     activeTab === "active" ? !order.isDelivered : order.isDelivered
   );
 
-  // Handle reordering: dispatch items to cart
-  const handleReorder = (order) => {
-    // Dispatch the items of the order to the cart
-    order.orderItems.forEach(item => {
-      dispatch(addToCart(item)); // Add each item in the order to the cart
-    });
-  };
 
+  const handleReorder = async (order) => {
+    console.log("Re-order clicked", order);
+    dispatch(resetCart());  // Reset the cart by clearing it from localStorage
+  
+    for (const item of order.orderItems) {
+      console.log("Processing item", item);
+  
+      // Step 1: Skip bundles
+      if (!item.isBundle) {
+        // Step 2: Fetch product details (including countInStock) from the database using the product ID
+        try {
+          const { data: product } = await axios.get(`http://localhost:3000/api/products/${item.product}`);
+  
+          // Step 3: Update item with correct stock level
+          const updatedItem = {
+            ...item,
+            countInStock: product.countInStock // Add countInStock to the item
+          };
+  
+          // Step 4: Check if product quantity is less than countInStock
+          if (updatedItem.qty <= updatedItem.countInStock) {
+            console.log("Adding item to cart", updatedItem);
+            // Step 5: Dispatch addToCart action if stock is sufficient
+            dispatch(addToCart(updatedItem));
+          } else {
+            console.log(`Not enough stock for ${updatedItem.name}`);
+          }
+        } catch (error) {
+          console.error("Error fetching product details:", error);
+        }
+      } else {
+        console.log("Skipping bundle item", item);
+      }
+    }
+  };
+  
+  
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">
