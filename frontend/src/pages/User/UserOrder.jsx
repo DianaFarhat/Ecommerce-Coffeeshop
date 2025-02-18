@@ -15,7 +15,8 @@ const UserOrder = () => {
   const [activeTab, setActiveTab] = useState("active");
 
   const dispatch = useDispatch();
-  
+    const navigate = useNavigate();
+
 
   useEffect(() => {
     const fetchOrders = async () => {
