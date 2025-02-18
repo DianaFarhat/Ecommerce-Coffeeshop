@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Message from "../../components/Message";
 import Loader from "../../components/Loader";
+import { addToCart } from "../../redux/features/cart/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+
 
 const UserOrder = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
+  const navigate = useNavigate();
+    const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -19,10 +25,7 @@ const UserOrder = () => {
           `http://localhost:3000/api/orders/mine?userId=${userId}`,
           { withCredentials: true }
         );
-            console.log(userId)
-            console.log(data)
-
-
+        
         setOrders(data);
         setLoading(false);
       } catch (err) {
@@ -33,6 +36,28 @@ const UserOrder = () => {
 
     fetchOrders();
   }, []);
+
+  const reorderHandler = async (orderId) => {
+    try {
+      const { data:reorderedItems  } = await axios.post(
+        `http://localhost:3000/api/orders/${orderId}/reorder`
+      );
+
+      // Store reordered items in local storage (simulating a cart)
+      localStorage.setItem("cartItems", JSON.stringify(reorderedItems));
+
+
+     // Dispatch each product with its quantity to the Redux store
+    reorderedItems.forEach((product) => {
+      dispatch(addToCart({ ...product, qty: product.qty }));
+    });
+
+      // Redirect to cart
+      navigate("/cart");
+    } catch (error) {
+      console.error("Error reordering:", error.response?.data || error.message);
+    }
+  };
 
   const filteredOrders = orders.filter((order) =>
     activeTab === "active" ? !order.isDelivered : order.isDelivered
@@ -130,13 +155,23 @@ const UserOrder = () => {
                 </div>
               </div>
 
-              {/* View Details Button */}
-              <div className="mt-6 flex justify-end">
+              {/* View Details & Reorder Buttons */}
+              <div className="mt-6 flex justify-end space-x-3">
                 <Link to={`/order/${order._id}`}>
                   <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-6 rounded-md transition-all duration-200">
                     View Details
                   </button>
                 </Link>
+
+                {/* Show Reorder button only for completed orders */}
+                {order.isPaid && order.isDelivered && (
+                  <button
+                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-md transition-all duration-200"
+                    onClick={() => reorderHandler(order._id)}
+                  >
+                    Reorder
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -147,3 +182,4 @@ const UserOrder = () => {
 };
 
 export default UserOrder;
+

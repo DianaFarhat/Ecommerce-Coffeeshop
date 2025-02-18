@@ -59,9 +59,9 @@ const PlaceOrder = () => {
 
        
 
-        setTimeout(() => {
+       
           navigate(`/order/${data._id}`);
-      }, 2000); // 2000 ms = 2 seconds
+    
 
      
 

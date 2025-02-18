@@ -83,6 +83,7 @@ const ProductDetails = () => {
           String(x._id) === String(product._id) && x.isBundle === false
         );
   
+        console.log(product)
         // Always pass just `qty` to Redux, let Redux handle updating
         dispatch(addToCart({ ...product, qty:1 }));
         toast.success("Item added successfully");
