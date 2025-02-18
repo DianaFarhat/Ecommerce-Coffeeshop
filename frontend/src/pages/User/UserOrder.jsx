@@ -137,6 +137,12 @@ const UserOrder = () => {
                     View Details
                   </button>
                 </Link>
+                <Link to={`/order/${order._id}`}>
+                  <button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2 px-6 rounded-md transition-all duration-200 ml-4">
+                    Re-order
+                  </button>
+                </Link>
+
               </div>
             </div>
           ))}
