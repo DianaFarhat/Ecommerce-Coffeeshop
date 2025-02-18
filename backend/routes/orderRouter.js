@@ -6,7 +6,7 @@ const  {
   getAllOrders,cancelOrder,
   getUserOrders,
   countTotalOrders,
-  calculateTotalSales,
+  calculateTotalSales,reorderOrder,
   calcualteTotalSalesByDate,
   findOrderById,
   markOrderAsPaid,
@@ -17,6 +17,9 @@ const { authenticate } =require( "../middlewares/authMiddleware.js");
 
 router.route("/").post(authenticate, createOrder)
 //.get(authenticate, getAllOrders);
+
+router.post("/:id/reorder", reorderOrder);
+
 
 router.route("/mine").get(authenticate, getUserOrders);
 router.route("/total-orders").get(countTotalOrders);

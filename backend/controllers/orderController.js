@@ -272,3 +272,41 @@ exports.cancelOrder = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
+
+exports.reorderOrder = async (req, res) => {
+  console.log("hit reorder");
+  try {
+    // Find the order by ID
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Extract product details including qty
+    const reorderedItems = order.orderItems.map((item) => ({
+      product: item.product, // Product ID
+      qty: item.qty, // Quantity
+    }));
+
+    // Fetch full product details from MongoDB
+    const productsFromDB = await Product.find({ _id: { $in: reorderedItems.map(item => item.product) } });
+
+    // Map product details with corresponding quantities
+    const productsWithQty = productsFromDB.map((product) => {
+      const matchingItem = reorderedItems.find((item) => item.product.toString() === product._id.toString());
+      return {
+        ...product.toObject(),
+        qty: matchingItem ? matchingItem.qty : 1, // Ensure qty is included
+      };
+    });
+
+    console.log("📦 Found products with qty:", productsWithQty);
+
+    // Return the products to be added to the cart
+    res.json(productsWithQty);
+  } catch (error) {
+    console.error("Error in reorder function:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
