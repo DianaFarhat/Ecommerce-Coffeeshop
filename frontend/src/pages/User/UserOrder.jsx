@@ -3,12 +3,18 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Message from "../../components/Message";
 import Loader from "../../components/Loader";
+import { addToCart } from '../../redux/features/cart/cartSlice';
+import { useDispatch } from 'react-redux';
+
 
 const UserOrder = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
+
+  const dispatch = useDispatch();
+  
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -37,6 +43,14 @@ const UserOrder = () => {
   const filteredOrders = orders.filter((order) =>
     activeTab === "active" ? !order.isDelivered : order.isDelivered
   );
+
+  // Handle reordering: dispatch items to cart
+  const handleReorder = (order) => {
+    // Dispatch the items of the order to the cart
+    order.orderItems.forEach(item => {
+      dispatch(addToCart(item)); // Add each item in the order to the cart
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -137,12 +151,12 @@ const UserOrder = () => {
                     View Details
                   </button>
                 </Link>
-                <Link to={`/order/${order._id}`}>
-                  <button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2 px-6 rounded-md transition-all duration-200 ml-4">
-                    Re-order
-                  </button>
-                </Link>
-
+                <button
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2 px-6 rounded-md transition-all duration-200 ml-4"
+                  onClick={() => handleReorder(order)} // Use handleReorder for reordering
+                >
+                  Re-order
+                </button>
               </div>
             </div>
           ))}
