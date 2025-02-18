@@ -140,7 +140,10 @@ removeFromCart: (state, action) => {
       return allCarts[loggedInUserId] || { cartItems: [], shippingAddress: {}, paymentMethod: "PayPal" };
     
     
-  }}
+  }},
+
+  
+  
 });
 
 export const {

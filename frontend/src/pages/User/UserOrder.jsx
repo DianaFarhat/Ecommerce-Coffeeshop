@@ -13,8 +13,9 @@ const UserOrder = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
-  const navigate = useNavigate();
-    const dispatch = useDispatch();
+
+  const dispatch = useDispatch();
+  
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -63,6 +64,10 @@ const UserOrder = () => {
     activeTab === "active" ? !order.isDelivered : order.isDelivered
   );
 
+
+
+  
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">
