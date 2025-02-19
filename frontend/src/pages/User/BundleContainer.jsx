@@ -218,7 +218,7 @@ const BundleContainer = ({ bundles }) => {
               Original Price: ${bundle.originalPrice}
             </p>
             <p className="text-xl font-semibold text-yellow-600">
-              Final Price: ${bundle.finalPrice}
+              Final Price: ${bundle.FinalPrice}
             </p>
           </div>
           <button
