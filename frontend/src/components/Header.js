@@ -31,15 +31,15 @@ const Header = () => {
   }
 
   if (error) {
-    return <h1>ERROR: {error.message}</h1>;
+    return <h1 className="text-red-500 font-bold text-center">ERROR: {error.message}</h1>;
   }
 
   return (
     <div className="flex justify-around">
       <div className="xl:block lg:hidden md:hidden sm:hidden">
         {/* "Our Best Sellers" Section */}
-        <div className="text-center py-4 mb-6  rounded-xl">
-          <h2 className="text-pink-500 text-3xl font-bold">Our Best Sellers</h2> {/* Updated text color to pink */}
+        <div className="text-center py-4 mb-6 rounded-xl">
+          <h2 className="text-pink-500 text-3xl font-bold">Our Best Sellers</h2>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -51,8 +51,10 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Product carousel */}
-      <ProductCarousel />
+      {/* Product carousel with margin-top */}
+      <div className="mt-26">
+        <ProductCarousel />
+      </div>
     </div>
   );
 };
