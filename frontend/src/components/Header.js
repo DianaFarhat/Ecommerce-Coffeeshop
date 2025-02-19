@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "./Loader";
-import SmallProduct from "../pages/Products/SmallProduct";
 import ProductCarousel from "../pages/Products/ProductCarousel";
 
 const Header = () => {
@@ -24,36 +23,24 @@ const Header = () => {
     };
 
     fetchTopProducts();
-  }, []);
+  }, []); // Runs only once when component mounts
 
   if (isLoading) {
-    return <Loader />;
+    return <Loader />; // Show loader while fetching data
   }
 
   if (error) {
-    return <h1 className="text-red-500 font-bold text-center">ERROR: {error.message}</h1>;
+    return <h1 className="text-red-500 font-bold text-center">ERROR: {error.message}</h1>; // Show error message
   }
 
   return (
-    <div className="flex justify-around">
-      <div className="xl:block lg:hidden md:hidden sm:hidden">
-        {/* "Our Best Sellers" Section */}
-        <div className="text-center py-4 mb-6 rounded-xl">
-          <h2 className="text-pink-500 text-3xl font-bold">Our Best Sellers</h2>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {data.map((product) => (
-            <div key={product._id}>
-              <SmallProduct product={product} />
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="flex flex-col items-center">
+      {/* "Our Best Sellers" Title */}
+      <h1 className=" mt-[10rem] text-[3rem]">Our Best Sellers</h1>
 
       {/* Product carousel with margin-top */}
-      <div className="mt-26">
-        <ProductCarousel />
+      <div className="mt-10">
+        <ProductCarousel products={data} /> {/* Pass fetched data to the carousel */}
       </div>
     </div>
   );
