@@ -126,10 +126,25 @@ const checkoutHandler = async () => {
 };
 
 
+const resetCartHandler = () => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "Do you want to clear your cart?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, clear it!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      dispatch(resetCart());
+      Swal.fire("Cleared!", "Your cart has been emptied.", "success");
+    }
+  });
+};
 
-  const resetCartHandler = () => {
-    dispatch(resetCart());
-  };
+
+ 
 
   const [forceRender, setForceRender] = useState(false);
 useEffect(() => {
