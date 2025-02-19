@@ -39,9 +39,9 @@ npm start
 
 🌐 Running the Project
 
-The backend will start on http://localhost:5000
+The backend will start on http://localhost:3000
 
-The frontend will start on http://localhost:3000
+The frontend will start on http://localhost:3001
 
 🎉 Now, you can explore the ecommerce platform!
 
