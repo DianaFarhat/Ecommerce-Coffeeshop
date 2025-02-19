@@ -150,7 +150,7 @@ const BundleContainer = ({ bundles }) => {
   {/* Bundles Container */}
   <div
     ref={bundlesRef}
-    className="flex overflow-x-auto scrollbar-hide"
+    className="flex overflow-x-hidden scrollbar-hide"  // Changed overflow-x-auto to overflow-x-hidden
     style={{
       scrollSnapType: "x mandatory",
       scrollBehavior: "smooth",
@@ -225,14 +225,13 @@ const BundleContainer = ({ bundles }) => {
             onClick={() => handleAddBundleToCart(bundle._id)}
             disabled={isLoading || isBundleInCart(bundle._id) || bundleStockStatus[bundle._id]}
             className={`mt-6 bg-yellow-500 text-white px-4 py-2 rounded-md transition-transform duration-200 hover:scale-105 focus:outline-none ${
-              isLoading || isBundleInCart(bundle._id) || bundleStockStatus[bundle._id] 
-                ? "opacity-50 cursor-not-allowed" 
+              isLoading || isBundleInCart(bundle._id) || bundleStockStatus[bundle._id]
+                ? "opacity-50 cursor-not-allowed"
                 : ""
             }`}
           >
             {isLoading ? "Loading..." : "Add Bundle to Cart"}
           </button>
-
         </div>
       </div>
     ))}
@@ -247,6 +246,7 @@ const BundleContainer = ({ bundles }) => {
     <ChevronRight size={24} />
   </button>
 </div>
+
   );
 };
 
