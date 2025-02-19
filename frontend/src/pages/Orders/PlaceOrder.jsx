@@ -120,7 +120,7 @@ const PlaceOrder = () => {
 
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
-          <div className="flex justify-between flex-wrap p-8 bg-[#181818]">
+          <div className="flex justify-between flex-wrap p-8 ">
             <ul className="text-lg">
             <li>
   <span className="font-semibold mb-4">Items: {cart.cartItems.reduce((acc, item) => acc + item.qty, 0)}</span> 
