@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
 import Ratings from './Ratings';
