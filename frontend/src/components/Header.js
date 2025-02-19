@@ -37,18 +37,22 @@ const Header = () => {
   return (
     <div className="flex justify-around">
       <div className="xl:block lg:hidden md:hidden sm:hidden">
-        <div className="grid grid-cols-2">
+        {/* "Our Best Sellers" Section */}
+        <div className="text-center py-4 mb-6  rounded-xl">
+          <h2 className="text-pink-500 text-3xl font-bold">Our Best Sellers</h2> {/* Updated text color to pink */}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           {data.map((product) => (
             <div key={product._id}>
               <SmallProduct product={product} />
             </div>
           ))}
-
-
         </div>
-
       </div>
-      <ProductCarousel/>
+
+      {/* Product carousel */}
+      <ProductCarousel />
     </div>
   );
 };

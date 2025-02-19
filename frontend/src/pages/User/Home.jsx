@@ -39,7 +39,9 @@ const Home = () => {
 
   return (
     <>
-      {!keyword && <Header />}
+     
+      {/* Add margin-top for the Header */}
+      {!keyword && <div className="mt-16"><Header /></div>}
       {isLoading ? (
         <Loader />
       ) : isError ? (
